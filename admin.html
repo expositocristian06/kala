@@ -377,7 +377,7 @@ function removeImage(e) {
 
 // ─── AUTH ───
 function login() {
-  const val = document.getElementById('passInput').value;
+  const val = document.getElementById('passInput').value.trim().toLowerCase();
   if (val === PASSWORD) {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('app').classList.add('visible');
@@ -518,8 +518,120 @@ function openModal(id) {
     document.getElementById('fOriginalPrice').value = p.originalPrice || '';
     document.getElementById('offerFields').classList.toggle('visible', !!p.onOffer);
   } else {
-    document.getElementById('modalTitle').textContent = 'Nuevo pro
+    document.getElementById('modalTitle').textContent = 'Nuevo producto';
+    document.getElementById('editId').value = '';
+    document.getElementById('fName').value = '';
+    document.getElementById('fCategory').value = '';
+    document.getElementById('fDesc').value = '';
+    document.getElementById('fPrice').value = '';
+    document.getElementById('fEmoji').value = '👗';
+    document.getElementById('fSizes').value = 'XS, S, M, L';
+    document.getElementById('fActive').checked = true;
+    document.getElementById('fOnOffer').checked = false;
+    currentImgBase64 = null;
+    document.getElementById('imgPreview').classList.remove('visible');
+    document.getElementById('imgUploadText').style.display = '';
+    document.getElementById('imgRemoveBtn').classList.remove('visible');
+    document.getElementById('fImg').value = '';
+    document.getElementById('fOriginalPrice').value = '';
+    document.getElementById('offerFields').classList.remove('visible');
+  }
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function toggleOfferFields() {
+  const checked = document.getElementById('fOnOffer').checked;
+  document.getElementById('offerFields').classList.toggle('visible', checked);
+}
+function saveProduct() {
+  const name = document.getElementById('fName').value.trim();
+  const category = document.getElementById('fCategory').value.trim();
+  const price = parseFloat(document.getElementById('fPrice').value);
+  if (!name || !category || !price) {
+    showToast('Completá nombre, categoría y precio');
+    return;
+  }
+  const sizesRaw = document.getElementById('fSizes').value;
+  const sizes = sizesRaw ? sizesRaw.split(',').map(s=>s.trim()).filter(Boolean) : ['Único'];
+  const onOffer = document.getElementById('fOnOffer').checked;
+  const originalPrice = onOffer ? parseFloat(document.getElementById('fOriginalPrice').value) || null : null;
 
+  const editId = document.getElementById('editId').value;
+  if (editId) {
+    const idx = products.findIndex(p=>p.id===parseInt(editId));
+    if (idx > -1) {
+      products[idx] = {
+        ...products[idx],
+        name,
+        category,
+        desc: document.getElementById('fDesc').value.trim(),
+        price,
+        emoji: document.getElementById('fEmoji').value.trim() || '👗',
+        img: currentImgBase64,
+        sizes,
+        active: document.getElementById('fActive').checked,
+        onOffer,
+        originalPrice
+      };
+      showToast(`"${name}" actualizado ✓`);
+    }
+  } else {
+    products.push({
+      id: nextId(),
+      name,
+      category,
+      desc: document.getElementById('fDesc').value.trim(),
+      price,
+      emoji: document.getElementById('fEmoji').value.trim() || '👗',
+      sizes,
+      active: document.getElementById('fActive').checked,
+      onOffer,
+      originalPrice,
+      img: null
+    });
+    showToast(`"${name}" agregado ✓`);
+  }
+  saveProducts();
+  renderStats();
+  renderTable();
+  updateCatList();
+  closeModal();
+}
 
+// ─── DELETE ───
+function confirmDelete(id, name) {
+  deleteTargetId = id;
+  document.getElementById('confirmText').textContent = `¿Seguro que querés eliminar "${name}"? Esta acción no se puede deshacer.`;
+  document.getElementById('confirmBtn').onclick = () => deleteProduct(id);
+  document.getElementById('confirmOverlay').classList.add('open');
+}
+function closeConfirm() {
+  document.getElementById('confirmOverlay').classList.remove('open');
+  deleteTargetId = null;
+}
+function deleteProduct(id) {
+  const p = products.find(x=>x.id===id);
+  products = products.filter(x=>x.id!==id);
+  saveProducts();
+  renderStats();
+  renderTable();
+  closeConfirm();
+  showToast(`"${p?.name}" eliminado`);
+}
 
-  
+// ─── TOAST ───
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+// Init: focus password
+document.getElementById('passInput').focus();
+</script>
+</body>
+</html>
+
