@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kala Indumentaria</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --coral:#E86B3A;
+  --coral-light:#F5A07A;
+  --pink:#F5C0C0;
+  --cream:#FDF8F5;
+  --cream-dark:#F5EDE6;
+  --text:#2C1810;
+  --text-muted:#8A6A5E;
+  --border:#E8D5CC;
+  --white:#FFFFFF;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--text);overflow-x:hidden}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(253,248,245,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:68px}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:600;color:var(--coral);letter-spacing:0.05em}
+.nav-logo span{color:var(--text);font-weight:300;font-size:0.7rem;display:block;letter-spacing:4px;text-transform:uppercase;margin-top:-4px}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nav-links a{font-size:0.78rem;color:var(--text-muted);text-decoration:none;letter-spacing:2px;text-transform:uppercase;transition:color .2s}
+.nav-links a:hover{color:var(--coral)}
+.cart-btn{position:relative;background:none;border:none;cursor:pointer;font-size:1.3rem;color:var(--text);padding:0.5rem}
+.cart-count{position:absolute;top:-2px;right:-4px;background:var(--coral);color:white;font-size:0.6rem;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;align-items:center;padding:6rem 2rem 4rem;background:linear-gradient(135deg,var(--cream) 0%,var(--cream-dark) 100%)}
+.hero-inner{max-width:1100px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+.hero-badge{font-size:0.72rem;letter-spacing:4px;text-transform:uppercase;color:var(--coral);margin-bottom:1.2rem;font-weight:500}
+.hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(3rem,6vw,5rem);font-weight:300;line-height:1.1;color:var(--text);margin-bottom:1.5rem}
+.hero h1 strong{font-weight:600;color:var(--coral)}
+.hero-sub{font-size:0.92rem;color:var(--text-muted);line-height:1.8;max-width:400px;font-weight:300;margin-bottom:2.5rem}
+.btn{display:inline-flex;align-items:center;gap:0.5rem;padding:0.9rem 2rem;border-radius:2px;font-size:0.8rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border:none;transition:all .25s;font-family:'Inter',sans-serif;font-weight:500;text-decoration:none}
+.btn-primary{background:var(--coral);color:white}
+.btn-primary:hover{background:#C8512A;transform:translateY(-2px)}
+.btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--coral);color:var(--coral)}
+.hero-image{aspect-ratio:3/4;background:linear-gradient(135deg,var(--pink) 0%,var(--cream-dark) 100%);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:5rem;color:var(--coral)}
+
+/* SECTIONS */
+section{padding:5rem 2rem}
+.section-inner{max-width:1100px;margin:0 auto}
+.section-label{font-size:0.72rem;letter-spacing:4px;text-transform:uppercase;color:var(--coral);margin-bottom:0.8rem;font-weight:500}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4vw,3rem);font-weight:400;color:var(--text);margin-bottom:3rem;line-height:1.2}
+.section-divider{width:40px;height:1px;background:var(--coral);margin:0.8rem 0 2.5rem}
+
+/* PRODUCTOS */
+#productos{background:var(--white)}
+.filters{display:flex;gap:0.8rem;margin-bottom:3rem;flex-wrap:wrap}
+.filter-btn{padding:0.5rem 1.2rem;border:1px solid var(--border);background:none;border-radius:2px;font-size:0.75rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;color:var(--text-muted);transition:all .2s;font-family:'Inter',sans-serif}
+.filter-btn.active,.filter-btn:hover{border-color:var(--coral);color:var(--coral);background:rgba(232,107,58,0.05)}
+.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:2rem}
+.product-card{background:var(--cream);border:1px solid var(--border);border-radius:4px;overflow:hidden;transition:transform .25s,box-shadow .25s;cursor:pointer}
+.product-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(232,107,58,0.12)}
+.product-img{aspect-ratio:3/4;background:linear-gradient(135deg,var(--pink) 0%,var(--cream-dark) 100%);display:flex;align-items:center;justify-content:center;font-size:3.5rem;position:relative}
+.product-img img{width:100%;height:100%;object-fit:cover;display:block}
+.product-badge{position:absolute;top:12px;left:12px;background:var(--coral);color:white;font-size:0.6rem;padding:0.2rem 0.6rem;letter-spacing:2px;text-transform:uppercase}
+.product-info{padding:1.2rem}
+.product-category{font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--coral);margin-bottom:0.3rem}
+.product-name{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:500;color:var(--text);margin-bottom:0.3rem}
+.product-desc{font-size:0.78rem;color:var(--text-muted);margin-bottom:1rem;font-weight:300;line-height:1.5}
+.product-footer{display:flex;align-items:center;justify-content:space-between}
+.product-price{font-size:1rem;font-weight:600;color:var(--text)}
+.add-btn{background:var(--coral);color:white;border:none;padding:0.5rem 1rem;font-size:0.7rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:background .2s;font-family:'Inter',sans-serif}
+.add-btn:hover{background:#C8512A}
+.add-btn:disabled{background:var(--border);cursor:default}
+.out-of-stock{font-size:0.7rem;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase}
+
+/* CART SIDEBAR */
+.cart-overlay{position:fixed;inset:0;background:rgba(44,24,16,0.4);z-index:200;opacity:0;pointer-events:none;transition:opacity .3s}
+.cart-overlay.open{opacity:1;pointer-events:all}
+.cart-sidebar{position:fixed;top:0;right:0;bottom:0;width:420px;max-width:100vw;background:var(--white);z-index:201;transform:translateX(100%);transition:transform .35s ease;display:flex;flex-direction:column}
+.cart-sidebar.open{transform:translateX(0)}
+.cart-header{padding:1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.cart-header h3{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:500}
+.cart-close{background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--text-muted);padding:0.3rem}
+.cart-items{flex:1;overflow-y:auto;padding:1.5rem}
+.cart-empty{text-align:center;padding:3rem 1rem;color:var(--text-muted)}
+.cart-empty span{font-size:3rem;display:block;margin-bottom:1rem}
+.cart-empty p{font-size:0.85rem;letter-spacing:1px}
+.cart-item{display:flex;gap:1rem;margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
+.cart-item-img{width:70px;height:90px;background:linear-gradient(135deg,var(--pink),var(--cream-dark));border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;overflow:hidden}
+.cart-item-img img{width:100%;height:100%;object-fit:cover}
+.cart-item-info{flex:1}
+.cart-item-name{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:500;margin-bottom:0.2rem}
+.cart-item-variant{font-size:0.72rem;color:var(--text-muted);letter-spacing:1px;margin-bottom:0.5rem}
+.cart-item-footer{display:flex;align-items:center;justify-content:space-between}
+.cart-item-price{font-weight:600;font-size:0.9rem}
+.qty-control{display:flex;align-items:center;gap:0.5rem}
+.qty-btn{background:none;border:1px solid var(--border);width:26px;height:26px;border-radius:2px;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;justify-content:center;color:var(--text);transition:all .2s}
+.qty-btn:hover{border-color:var(--coral);color:var(--coral)}
+.qty-num{font-size:0.85rem;font-weight:500;min-width:16px;text-align:center}
+.remove-item{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.8rem;padding:0.2rem;margin-top:0.3rem;display:block;text-transform:uppercase;letter-spacing:1px;transition:color .2s}
+.remove-item:hover{color:var(--coral)}
+.cart-footer{padding:1.5rem;border-top:1px solid var(--border)}
+.cart-subtotal{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem}
+.cart-subtotal span{font-size:0.85rem;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase}
+.cart-subtotal strong{font-size:1.1rem;font-weight:600}
+.cart-note{font-size:0.72rem;color:var(--text-muted);margin-bottom:1.2rem;line-height:1.5}
+.wsp-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:0.7rem;background:#25D366;color:white;padding:1rem;border:none;border-radius:2px;font-size:0.82rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;transition:background .2s}
+.wsp-btn:hover{background:#1aad50}
+.wsp-btn svg{width:20px;height:20px;fill:white}
+
+/* PRODUCT MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(44,24,16,0.5);z-index:300;opacity:0;pointer-events:none;transition:opacity .3s;display:flex;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--white);border-radius:4px;max-width:800px;width:100%;max-height:90vh;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;transform:translateY(20px);transition:transform .3s}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-img{background:linear-gradient(135deg,var(--pink),var(--cream-dark));display:flex;align-items:center;justify-content:center;font-size:5rem;min-height:300px;overflow:hidden}
+.modal-img img{width:100%;height:100%;object-fit:cover}
+.modal-body{padding:2rem}
+.modal-close{float:right;background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--text-muted);margin-bottom:1rem}
+.modal-category{font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--coral);margin-bottom:0.5rem}
+.modal-name{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:500;color:var(--text);margin-bottom:0.5rem}
+.modal-price{font-size:1.3rem;font-weight:600;color:var(--text);margin-bottom:1rem}
+.modal-desc{font-size:0.85rem;color:var(--text-muted);line-height:1.7;margin-bottom:1.5rem;font-weight:300}
+.size-label{font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.6rem}
+.sizes{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.size-opt{padding:0.4rem 0.8rem;border:1px solid var(--border);background:none;border-radius:2px;font-size:0.78rem;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
+.size-opt.active{border-color:var(--coral);background:var(--coral);color:white}
+.size-opt:hover:not(.active){border-color:var(--coral);color:var(--coral)}
+.modal-add-btn{width:100%;padding:1rem;background:var(--coral);color:white;border:none;font-size:0.8rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:2px;font-family:'Inter',sans-serif;font-weight:600;transition:background .2s}
+.modal-add-btn:hover{background:#C8512A}
+
+/* INFO SECTION */
+.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem}
+.info-card{text-align:center;padding:2rem 1.5rem;background:var(--white);border:1px solid var(--border);border-radius:4px}
+.info-icon{font-size:2rem;margin-bottom:1rem}
+.info-card h3{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:500;margin-bottom:0.5rem;color:var(--text)}
+.info-card p{font-size:0.8rem;color:var(--text-muted);line-height:1.6;font-weight:300}
+
+/* FOOTER */
+footer{background:var(--text);color:var(--cream);padding:3rem 2rem;text-align:center}
+.footer-logo{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:600;color:var(--coral);margin-bottom:0.3rem}
+.footer-sub{font-size:0.7rem;letter-spacing:4px;text-transform:uppercase;color:rgba(253,248,245,0.5);margin-bottom:1.5rem}
+.footer-info{font-size:0.78rem;color:rgba(253,248,245,0.6);line-height:1.8}
+.footer-info a{color:var(--coral);text-decoration:none}
+.footer-copy{margin-top:2rem;font-size:0.7rem;color:rgba(253,248,245,0.3);letter-spacing:1px}
+
+/* FLOAT WSP */
+.float-wsp{position:fixed;bottom:1.8rem;right:1.8rem;z-index:150;width:56px;height:56px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,0.4);text-decoration:none;transition:transform .25s}
+.float-wsp:hover{transform:scale(1.1)}
+.float-wsp svg{width:28px;height:28px;fill:white}
+
+/* OFERTAS SECTION */
+#ofertas{background:var(--cream-dark);padding:4rem 2rem}
+.ofertas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.5rem}
+.oferta-card{background:var(--white);border:1px solid var(--border);border-radius:4px;overflow:hidden;cursor:pointer;transition:transform .25s,box-shadow .25s;position:relative}
+.oferta-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(232,107,58,0.15)}
+.oferta-badge{position:absolute;top:12px;right:12px;background:var(--coral);color:white;font-size:0.65rem;font-weight:700;padding:0.25rem 0.6rem;border-radius:2px;letter-spacing:1px}
+.oferta-img{aspect-ratio:3/4;background:linear-gradient(135deg,var(--pink),var(--cream-dark));display:flex;align-items:center;justify-content:center;font-size:3rem;overflow:hidden}
+.oferta-img img{width:100%;height:100%;object-fit:cover}
+.oferta-info{padding:1rem}
+.oferta-name{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:500;color:var(--text);margin-bottom:0.4rem}
+.oferta-prices{display:flex;align-items:center;gap:0.7rem}
+.oferta-original{font-size:0.85rem;color:var(--text-muted);text-decoration:line-through}
+.oferta-price{font-size:1.1rem;font-weight:700;color:var(--coral)}
+
+/* CART PAYMENT BUTTONS */
+.payment-btns{display:flex;flex-direction:column;gap:0.7rem;margin-top:0.8rem}
+.card-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:0.7rem;background:var(--text);color:var(--cream);padding:1rem;border:none;border-radius:2px;font-size:0.82rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;transition:background .2s}
+.card-btn:hover{background:#4a2010}
+
+/* CARD PAYMENT MODAL */
+.card-modal{position:fixed;inset:0;background:rgba(44,24,16,0.5);z-index:400;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .3s}
+.card-modal.open{opacity:1;pointer-events:all}
+.card-modal-box{background:var(--white);border-radius:4px;padding:2rem;max-width:420px;width:100%;transform:translateY(20px);transition:transform .3s}
+.card-modal.open .card-modal-box{transform:translateY(0)}
+.card-modal-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:500;margin-bottom:0.4rem}
+.card-modal-sub{font-size:0.8rem;color:var(--text-muted);margin-bottom:1.5rem;line-height:1.5}
+.card-modal label{font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:0.4rem}
+.card-modal input{width:100%;padding:0.75rem 1rem;border:1px solid var(--border);border-radius:2px;font-size:0.9rem;font-family:'Inter',sans-serif;color:var(--text);background:var(--cream);margin-bottom:1rem;outline:none;transition:border-color .2s}
+.card-modal input:focus{border-color:var(--coral)}
+.card-modal-actions{display:flex;gap:0.8rem;margin-top:0.5rem}
+.card-modal-actions button{flex:1;padding:0.85rem;border:none;border-radius:2px;font-size:0.78rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;transition:all .2s}
+.card-confirm-btn{background:var(--coral);color:white}
+.card-confirm-btn:hover{background:#C8512A}
+.card-cancel-btn{background:none;border:1px solid var(--border)!important;color:var(--text-muted)}
+.card-cancel-btn:hover{border-color:var(--coral)!important;color:var(--coral)}
+
+/* TOAST */
+.toast{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--cream);padding:0.8rem 1.5rem;border-radius:2px;font-size:0.8rem;letter-spacing:1px;z-index:500;opacity:0;transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* HAMBURGER MENU */
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:0.5rem;flex-direction:column;gap:5px}
+.hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;transition:all .3s}
+.hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+.mobile-menu{position:fixed;top:68px;left:0;right:0;background:rgba(253,248,245,0.98);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);z-index:99;padding:1.5rem 1.5rem;display:none;flex-direction:column;gap:0}
+.mobile-menu.open{display:flex}
+.mobile-menu a{font-size:0.9rem;color:var(--text);text-decoration:none;letter-spacing:2px;text-transform:uppercase;padding:0.9rem 0;border-bottom:1px solid var(--border);display:block;font-weight:400}
+.mobile-menu a:last-child{border-bottom:none}
+.mobile-menu a.offer-link{color:var(--coral);font-weight:600}
+
+/* FLOAT CART (mobile) */
+.float-cart{position:fixed;bottom:6rem;right:1.8rem;z-index:150;background:var(--coral);color:white;border:none;border-radius:50px;padding:0.75rem 1.2rem;font-size:0.78rem;font-family:'Inter',sans-serif;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;box-shadow:0 4px 20px rgba(232,107,58,0.4);display:none;align-items:center;gap:0.5rem;transition:transform .25s}
+.float-cart:hover{transform:scale(1.05)}
+.float-cart.visible{display:flex}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  nav{padding:0 1rem}
+  .nav-links{display:none}
+  .hamburger{display:flex}
+
+  .hero{min-height:85vh;padding:5rem 1.2rem 3rem}
+  .hero-inner{grid-template-columns:1fr;gap:0;text-align:center}
+  .hero-image{display:none}
+  .hero h1{font-size:2.8rem}
+  .hero-sub{font-size:0.88rem;max-width:100%;margin-left:auto;margin-right:auto}
+  .hero-badge{margin-bottom:0.8rem}
+  .btn{padding:0.85rem 1.5rem;font-size:0.75rem}
+
+  section{padding:3rem 1.2rem}
+  #ofertas{padding:3rem 0 3rem 1.2rem}
+  .section-title{margin-bottom:1.5rem;font-size:1.8rem}
+
+  /* Ofertas: scroll horizontal */
+  .ofertas-grid{display:flex;overflow-x:auto;gap:1rem;padding-right:1.2rem;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .ofertas-grid::-webkit-scrollbar{display:none}
+  .oferta-card{min-width:160px;flex-shrink:0;scroll-snap-align:start}
+  .oferta-img{aspect-ratio:3/4}
+
+  /* Productos: 2 columnas */
+  .products-grid{grid-template-columns:repeat(2,1fr);gap:0.8rem}
+  .product-info{padding:0.8rem}
+  .product-name{font-size:1rem}
+  .product-desc{display:none}
+  .product-price{font-size:0.9rem}
+  .add-btn{padding:0.45rem 0.7rem;font-size:0.65rem}
+
+  /* Filters: scroll horizontal */
+  .filters{flex-wrap:nowrap;overflow-x:auto;padding-bottom:0.5rem;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .filters::-webkit-scrollbar{display:none}
+  .filter-btn{white-space:nowrap;flex-shrink:0}
+
+  /* Cart: pantalla completa */
+  .cart-sidebar{width:100vw;border-radius:0}
+
+  /* Modal: pantalla completa */
+  .modal-overlay{padding:0;align-items:flex-end}
+  .modal{grid-template-columns:1fr;border-radius:12px 12px 0 0;max-height:92vh}
+  .modal-img{min-height:220px;max-height:240px}
+  .modal-body{padding:1.2rem}
+  .modal-name{font-size:1.4rem}
+  .modal-close{font-size:1.4rem;padding:0.4rem}
+
+  /* Info */
+  .info-grid{grid-template-columns:1fr}
+
+  /* Qty buttons más grandes */
+  .qty-btn{width:34px;height:34px;font-size:1rem}
+
+  /* Card modal */
+  .card-modal{align-items:flex-end;padding:0}
+  .card-modal-box{border-radius:12px 12px 0 0;max-width:100%}
+
+  /* Float WSP sube para dejar espacio al cart */
+  .float-wsp{bottom:1.8rem}
+}
+
+@media(max-width:380px){
+  .products-grid{grid-template-columns:repeat(2,1fr);gap:0.6rem}
+  .hero h1{font-size:2.3rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Kala<span>Indumentaria</span></div>
+  <ul class="nav-links">
+    <li><a href="#ofertas" style="color:var(--coral);font-weight:600">🔥 Ofertas</a></li>
+    <li><a href="#productos">Colección</a></li>
+    <li><a href="#info">Envíos</a></li>
+    <li><a href="#contacto">Contacto</a></li>
+  </ul>
+  <div style="display:flex;align-items:center;gap:0.5rem">
+    <button class="cart-btn" onclick="toggleCart()">
+      🛍️
+      <span class="cart-count" id="cartCount">0</span>
+    </button>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menú">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#ofertas" class="offer-link" onclick="closeMenu()">🔥 Ofertas</a>
+  <a href="#productos" onclick="closeMenu()">Colección</a>
+  <a href="#info" onclick="closeMenu()">Envíos</a>
+  <a href="#contacto" onclick="closeMenu()">Contacto</a>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="inicio">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-badge">Nueva colección · 2026</div>
+      <h1>Moda que te<br><strong>hace sentir</strong><br>vos.</h1>
+      <p class="hero-sub">Indumentaria y accesorios femeninos con identidad propia. Local en Mar del Plata, envíos a todo el país.</p>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap">
+        <a href="#productos" class="btn btn-primary">Ver colección</a>
+        <a href="https://wa.me/5492235396641" target="_blank" class="btn btn-ghost">Consultar por WhatsApp</a>
+        <a href="https://maps.google.com/?q=Kala+indumentaria+local+3,+Av.+Carlos+Tejedor+1967,+Mar+del+Plata" target="_blank" class="btn btn-ghost" style="border-color:var(--coral);color:var(--coral)">📍 Cómo llegar</a>
+      </div>
+    </div>
+    <div class="hero-image">👗</div>
+  </div>
+</section>
+
+<!-- OFERTAS -->
+<section id="ofertas">
+  <div class="section-inner">
+    <div class="section-label">Tiempo limitado</div>
+    <h2 class="section-title">Ofertas especiales</h2>
+    <div class="ofertas-grid" id="ofertasGrid"></div>
+  </div>
+</section>
+
+<!-- PRODUCTOS -->
+<section id="productos">
+  <div class="section-inner">
+    <div class="section-label">Colección</div>
+    <h2 class="section-title">Nuestros productos</h2>
+    <div class="filters" id="filters"></div>
+    <div class="products-grid" id="productsGrid"></div>
+  </div>
+</section>
+
+<!-- INFO -->
+<section id="info" style="background:var(--cream-dark)">
+  <div class="section-inner">
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="info-icon">📦</div>
+        <h3>Envíos a todo el país</h3>
+        <p>Coordinamos el envío por correo o encomienda. Consultá tiempos y costos por WhatsApp.</p>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">💳</div>
+        <h3>Pagá con tarjeta al instante</h3>
+        <p>Aceptamos todas las tarjetas vía Mercado Pago. Sin vueltas, sin efectivo, desde el celu.</p>
+      </div>
+      <div class="info-card" style="cursor:pointer" onclick="window.open('https://maps.google.com/?q=Kala+indumentaria+local+3,+Av.+Carlos+Tejedor+1967,+Mar+del+Plata','_blank')">
+        <div class="info-icon">📍</div>
+        <h3>Visitanos en el local</h3>
+        <p>Av. Carlos Tejedor 1967, Local 3 · Mar del Plata. Lun a Vie 10 a 13 hs y 16 a 19:30 hs. <span style="color:var(--coral);font-weight:500">Ver en Maps →</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer id="contacto">
+  <div class="footer-logo">Kala</div>
+  <div class="footer-sub">Indumentaria & Accesorios</div>
+  <div class="footer-info">
+    <p><a href="https://maps.google.com/?q=Kala+indumentaria+local+3,+Av.+Carlos+Tejedor+1967,+Mar+del+Plata" target="_blank" style="color:var(--coral)">📍 Av. Carlos Tejedor 1967, Local 3 · Mar del Plata</a></p>
+    <p>Lunes a Viernes: 10 a 13 hs y 16 a 19:30 hs</p>
+    <p style="margin-top:0.5rem"><a href="https://wa.me/5492235396641">WhatsApp: +54 9 223 539-6641</a></p>
+    <p><a href="https://instagram.com/kala.indumentariaa1" target="_blank">@kala.indumentariaa1</a></p>
+  </div>
+  <div class="footer-copy">© 2026 Kala Indumentaria — Todos los derechos reservados</div>
+  <div style="margin-top:1.5rem">
+    <a href="admin.html" style="font-size:0.65rem;color:rgba(253,248,245,0.2);text-decoration:none;letter-spacing:2px;text-transform:uppercase;transition:color .2s" onmouseover="this.style.color='rgba(253,248,245,0.5)'" onmouseout="this.style.color='rgba(253,248,245,0.2)'">⚙ Administración</a>
+  </div>
+</footer>
+
+<!-- CART SIDEBAR -->
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+<div class="cart-sidebar" id="cartSidebar">
+  <div class="cart-header">
+    <h3>Tu carrito</h3>
+    <button class="cart-close" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-footer" id="cartFooter" style="display:none">
+    <div class="cart-subtotal">
+      <span>Total</span>
+      <strong id="cartTotal">$0</strong>
+    </div>
+    <p class="cart-note">Elegí cómo querés pagar y te contactamos para coordinar el envío.</p>
+    <div class="payment-btns">
+      <button class="wsp-btn" onclick="sendWhatsApp()">
+        <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.525 3.48 11.815 11.815 0 0012.05 0z"/></svg>
+        Pagar por WhatsApp / Transferencia
+      </button>
+      <button class="card-btn" onclick="openCardModal()">
+        💳 Pagar con tarjeta (Mercado Pago)
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCT MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="productModal">
+    <div class="modal-img" id="modalImg"></div>
+    <div class="modal-body">
+      <button class="modal-close" onclick="closeModalBtn()">✕</button>
+      <div class="modal-category" id="modalCategory"></div>
+      <div class="modal-name" id="modalName"></div>
+      <div class="modal-price" id="modalPrice"></div>
+      <div class="modal-desc" id="modalDesc"></div>
+      <div class="size-label">Talle</div>
+      <div class="sizes" id="modalSizes"></div>
+      <button class="modal-add-btn" onclick="addFromModal()">Agregar al carrito</button>
+    </div>
+  </div>
+</div>
+
+<!-- CARD PAYMENT MODAL -->
+<div class="card-modal" id="cardModal">
+  <div class="card-modal-box">
+    <div class="card-modal-title">Pagar con tarjeta</div>
+    <p class="card-modal-sub">Te enviamos un link de Mercado Pago por WhatsApp para que puedas pagar con cualquier tarjeta, en cuotas o sin interés.</p>
+    <label for="cardName">Tu nombre</label>
+    <input type="text" id="cardName" placeholder="Ej: María González">
+    <label for="cardPhone">Tu WhatsApp</label>
+    <input type="tel" id="cardPhone" placeholder="Ej: 2231234567">
+    <div class="card-modal-actions">
+      <button class="card-cancel-btn" onclick="closeCardModal()">Cancelar</button>
+      <button class="card-confirm-btn" onclick="sendCardPayment()">Solicitar link 💳</button>
+    </div>
+  </div>
+</div>
+
+<!-- FLOAT CART -->
+<button class="float-cart" id="floatCart" onclick="toggleCart()">
+  🛍️ Ver carrito (<span id="floatCartCount">0</span>)
+</button>
+
+<!-- FLOAT WSP -->
+<a href="https://wa.me/5492235396641" target="_blank" class="float-wsp" title="WhatsApp">
+  <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.525 3.48 11.815 11.815 0 0012.05 0z"/></svg>
+</a>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── DEFAULT PRODUCTS ───
+const DEFAULT_PRODUCTS = [
+  {id:1,name:"Camisa lino oversize",category:"Remeras",price:18500,desc:"Camisa de lino premium con corte oversize. Perfecta para el día a día. Disponible en blanco y natural.",sizes:["XS","S","M","L","XL"],active:true,emoji:"👕",onOffer:false,originalPrice:null},
+  {id:2,name:"Pantalón palazzo",category:"Pantalones",price:24000,desc:"Pantalón de tiro alto con caída amplia. Tela liviana y fresca ideal para verano.",sizes:["S","M","L"],active:true,emoji:"👖",onOffer:false,originalPrice:null},
+  {id:3,name:"Vestido midi floral",category:"Vestidos",price:24900,desc:"Vestido midi con estampado floral exclusivo. Escote en V y manga corta con volado.",sizes:["XS","S","M","L"],active:true,emoji:"👗",onOffer:true,originalPrice:32000},
+  {id:4,name:"Blazer cropped",category:"Abrigos",price:42000,desc:"Blazer cropped de fibrana. Ideal para looks de oficina o salidas nocturnas.",sizes:["S","M","L","XL"],active:true,emoji:"🧥",onOffer:false,originalPrice:null},
+  {id:5,name:"Falda midi plisada",category:"Faldas",price:21000,desc:"Falda midi plisada con cintura elástica. Cae perfecto y es súper cómoda.",sizes:["XS","S","M","L"],active:true,emoji:"👗",onOffer:false,originalPrice:null},
+  {id:6,name:"Top bandeau",category:"Remeras",price:8500,desc:"Top bandeau con breteles finos. Combinalo con cualquier pantalón o falda.",sizes:["XS","S","M"],active:true,emoji:"👙",onOffer:true,originalPrice:12000},
+  {id:7,name:"Cartera de cuero",category:"Accesorios",price:28000,desc:"Cartera de cuero ecológico con cierre metálico dorado. Ideal para el día a día.",sizes:["Único"],active:true,emoji:"👜",onOffer:false,originalPrice:null},
+  {id:8,name:"Conjunto lino",category:"Conjuntos",price:38500,desc:"Conjunto de camisa y pantalón en lino natural. Cómodo, fresco y muy elegante.",sizes:["S","M","L"],active:true,emoji:"🌿",onOffer:true,originalPrice:48000}
+];
+
+// ─── STATE ───
+let products = [];
+let cart = [];
+let activeFilter = 'Todos';
+let selectedProduct = null;
+let selectedSize = null;
+
+// ─── INIT ───
+function init() {
+  const saved = localStorage.getItem('kala_products');
+  products = saved ? JSON.parse(saved) : DEFAULT_PRODUCTS;
+  const savedCart = localStorage.getItem('kala_cart');
+  cart = savedCart ? JSON.parse(savedCart) : [];
+  renderOfertas();
+  renderFilters();
+  renderProducts();
+  updateCartUI();
+}
+
+// ─── OFERTAS ───
+function calcDiscount(original, current) {
+  return Math.round((1 - current / original) * 100);
+}
+function renderOfertas() {
+  const el = document.getElementById('ofertasGrid');
+  const ofertas = products.filter(p => p.active && p.onOffer && p.originalPrice);
+  if (!ofertas.length) {
+    document.getElementById('ofertas').style.display = 'none';
+    return;
+  }
+  document.getElementById('ofertas').style.display = '';
+  el.innerHTML = ofertas.map(p => `
+    <div class="oferta-card" onclick="openModal(${p.id})">
+      <div class="oferta-badge">-${calcDiscount(p.originalPrice, p.price)}%</div>
+      <div class="oferta-img">${p.img ? `<img src="${p.img}" alt="${p.name}">` : p.emoji || '👗'}</div>
+      <div class="oferta-info">
+        <div class="oferta-name">${p.name}</div>
+        <div class="oferta-prices">
+          <span class="oferta-original">${formatPrice(p.originalPrice)}</span>
+          <span class="oferta-price">${formatPrice(p.price)}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ─── FILTERS ───
+function getCategories() {
+  const cats = ['Todos', ...new Set(products.filter(p=>p.active).map(p=>p.category))];
+  return cats;
+}
+function renderFilters() {
+  const el = document.getElementById('filters');
+  el.innerHTML = getCategories().map(c=>`
+    <button class="filter-btn ${c===activeFilter?'active':''}" onclick="setFilter('${c}')">${c}</button>
+  `).join('');
+}
+function setFilter(cat) {
+  activeFilter = cat;
+  renderFilters();
+  renderProducts();
+}
+
+// ─── PRODUCTS ───
+function formatPrice(p) {
+  return '$' + p.toLocaleString('es-AR');
+}
+function renderProducts() {
+  const filtered = products.filter(p => p.active && (activeFilter==='Todos' || p.category===activeFilter));
+  const el = document.getElementById('productsGrid');
+  if(!filtered.length) {
+    el.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;letter-spacing:1px">No hay productos disponibles en esta categoría.</p>';
+    return;
+  }
+  el.innerHTML = filtered.map(p=>`
+    <div class="product-card" onclick="openModal(${p.id})">
+      <div class="product-img">${p.img ? `<img src="${p.img}" alt="${p.name}">` : p.emoji||'👗'}</div>
+      <div class="product-info">
+        <div class="product-category">${p.category}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-desc">${p.desc}</div>
+        <div class="product-footer">
+          <div class="product-price">${formatPrice(p.price)}</div>
+          <button class="add-btn" onclick="event.stopPropagation();quickAdd(${p.id})">+ Agregar</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ─── MODAL ───
+function openModal(id) {
+  const p = products.find(x=>x.id===id);
+  if(!p) return;
+  selectedProduct = p;
+  selectedSize = p.sizes[0];
+  document.getElementById('modalImg').innerHTML = p.img ? `<img src="${p.img}" alt="${p.name}">` : (p.emoji||'👗');
+  document.getElementById('modalCategory').textContent = p.category;
+  document.getElementById('modalName').textContent = p.name;
+  document.getElementById('modalPrice').textContent = formatPrice(p.price);
+  document.getElementById('modalDesc').textContent = p.desc;
+  document.getElementById('modalSizes').innerHTML = p.sizes.map(s=>`
+    <button class="size-opt ${s===selectedSize?'active':''}" onclick="selectSize('${s}')">${s}</button>
+  `).join('');
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function selectSize(s) {
+  selectedSize = s;
+  document.querySelectorAll('.size-opt').forEach(b=>b.classList.toggle('active',b.textContent===s));
+}
+function closeModal(e) {
+  if(e.target.id==='modalOverlay') closeModalBtn();
+}
+function closeModalBtn() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow='';
+  selectedProduct=null;
+}
+function addFromModal() {
+  if(!selectedProduct) return;
+  addToCart(selectedProduct, selectedSize);
+  closeModalBtn();
+}
+function quickAdd(id) {
+  const p = products.find(x=>x.id===id);
+  if(!p) return;
+  if(p.sizes.length > 1) { openModal(id); return; }
+  addToCart(p, p.sizes[0]);
+}
+
+// ─── CART ───
+function addToCart(product, size) {
+  const key = `${product.id}_${size}`;
+  const existing = cart.find(i=>i.key===key);
+  if(existing) { existing.qty++; }
+  else { cart.push({key,id:product.id,name:product.name,price:product.price,size,qty:1,emoji:product.emoji||'👗',img:product.img||null}); }
+  saveCart();
+  updateCartUI();
+  showToast(`"${product.name}" agregado al carrito`);
+}
+function removeFromCart(key) {
+  cart = cart.filter(i=>i.key!==key);
+  saveCart();
+  updateCartUI();
+  renderCartItems();
+}
+function changeQty(key, delta) {
+  const item = cart.find(i=>i.key===key);
+  if(!item) return;
+  item.qty += delta;
+  if(item.qty <= 0) { removeFromCart(key); return; }
+  saveCart();
+  updateCartUI();
+  renderCartItems();
+}
+function saveCart() { localStorage.setItem('kala_cart',JSON.stringify(cart)); }
+function getTotal() { return cart.reduce((s,i)=>s+i.price*i.qty,0); }
+function updateCartUI() {
+  const count = cart.reduce((s,i)=>s+i.qty,0);
+  document.getElementById('cartCount').textContent = count;
+  document.getElementById('cartCount').style.display = count ? 'flex' : 'none';
+  // Botón flotante mobile
+  const floatCart = document.getElementById('floatCart');
+  document.getElementById('floatCartCount').textContent = count;
+  floatCart.classList.toggle('visible', count > 0);
+}
+
+// ─── CART SIDEBAR ───
+function toggleCart() {
+  const sidebar = document.getElementById('cartSidebar');
+  const overlay = document.getElementById('cartOverlay');
+  const open = sidebar.classList.toggle('open');
+  overlay.classList.toggle('open', open);
+  if(open) { renderCartItems(); document.body.style.overflow='hidden'; }
+  else { document.body.style.overflow=''; }
+}
+function renderCartItems() {
+  const el = document.getElementById('cartItems');
+  const footer = document.getElementById('cartFooter');
+  if(!cart.length) {
+    el.innerHTML = '<div class="cart-empty"><span>🛍️</span><p>Tu carrito está vacío</p></div>';
+    footer.style.display='none';
+    return;
+  }
+  footer.style.display='block';
+  el.innerHTML = cart.map(i=>`
+    <div class="cart-item">
+      <div class="cart-item-img">${i.img?`<img src="${i.img}" alt="${i.name}">`:i.emoji}</div>
+      <div class="cart-item-info">
+        <div class="cart-item-name">${i.name}</div>
+        <div class="cart-item-variant">Talle: ${i.size}</div>
+        <div class="cart-item-footer">
+          <div class="cart-item-price">${formatPrice(i.price*i.qty)}</div>
+          <div class="qty-control">
+            <button class="qty-btn" onclick="changeQty('${i.key}',-1)">−</button>
+            <span class="qty-num">${i.qty}</span>
+            <button class="qty-btn" onclick="changeQty('${i.key}',1)">+</button>
+          </div>
+        </div>
+        <button class="remove-item" onclick="removeFromCart('${i.key}')">Eliminar</button>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('cartTotal').textContent = formatPrice(getTotal());
+}
+
+// ─── WHATSAPP ───
+function sendWhatsApp() {
+  if(!cart.length) return;
+  const items = cart.map(i=>`• ${i.name} (Talle ${i.size}) x${i.qty} = ${formatPrice(i.price*i.qty)}`).join('\n');
+  const total = formatPrice(getTotal());
+  const msg = `Hola Kala! Quiero hacer el siguiente pedido:\n\n${items}\n\n*Total: ${total}*\n\n¿Cómo coordino el pago y envío?`;
+  window.open(`https://wa.me/5492235396641?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+// ─── CARD PAYMENT ───
+function openCardModal() {
+  if(!cart.length) return;
+  document.getElementById('cardModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeCardModal() {
+  document.getElementById('cardModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function sendCardPayment() {
+  const name = document.getElementById('cardName').value.trim();
+  const phone = document.getElementById('cardPhone').value.trim();
+  if(!name || !phone) { showToast('Completá tu nombre y WhatsApp'); return; }
+  const items = cart.map(i=>`• ${i.name} (Talle ${i.size}) x${i.qty} = ${formatPrice(i.price*i.qty)}`).join('\n');
+  const total = formatPrice(getTotal());
+  const msg = `Hola Kala! Quiero pagar con tarjeta a través de Mercado Pago.\n\nMi pedido:\n${items}\n\n*Total: ${total}*\n\nNombre: ${name}\nWhatsApp: ${phone}\n\n¿Me pueden enviar el link de pago?`;
+  closeCardModal();
+  toggleCart();
+  window.open(`https://wa.me/5492235396641?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+// ─
