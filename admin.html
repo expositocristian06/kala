@@ -61,7 +61,7 @@ main{flex:1;padding:2rem;max-width:1200px;margin:0 auto;width:100%}
 .add-btn{background:var(--coral);color:white;border:none;padding:0.6rem 1.4rem;border-radius:4px;font-size:0.78rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;transition:background .2s;display:flex;align-items:center;gap:0.4rem}
 .add-btn:hover{background:#C8512A}
 
-/* PRODUCT TABLE */
+/* ── DESKTOP TABLE ── */
 .table-wrap{background:var(--white);border:1px solid var(--border);border-radius:6px;overflow:hidden}
 table{width:100%;border-collapse:collapse}
 th{text-align:left;padding:0.9rem 1rem;font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);background:var(--cream);font-weight:500}
@@ -71,15 +71,28 @@ tr:hover td{background:var(--cream)}
 .prod-emoji{font-size:1.6rem;display:flex;align-items:center;justify-content:center;width:44px;height:44px;background:var(--cream-dark);border-radius:4px;overflow:hidden}
 .prod-emoji img{width:100%;height:100%;object-fit:cover}
 .prod-name{font-weight:500;color:var(--text);margin-bottom:0.15rem}
-.prod-cat{font-size:0.7rem;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)}
+.prod-sizes{font-size:0.7rem;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)}
 .price-cell{font-weight:600;color:var(--text)}
 .original-price{font-size:0.75rem;color:var(--text-muted);text-decoration:line-through;display:block}
 .offer-price{color:var(--coral)}
 
+/* ── MOBILE CARDS ── */
+.cards-wrap{display:none;flex-direction:column;gap:0.75rem}
+.product-card{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:1rem;display:flex;gap:0.9rem;align-items:flex-start}
+.card-img{font-size:1.6rem;display:flex;align-items:center;justify-content:center;width:52px;height:52px;background:var(--cream-dark);border-radius:6px;flex-shrink:0;overflow:hidden}
+.card-img img{width:100%;height:100%;object-fit:cover}
+.card-body{flex:1;min-width:0}
+.card-name{font-weight:600;font-size:0.9rem;color:var(--text);margin-bottom:0.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-meta{font-size:0.72rem;color:var(--text-muted);margin-bottom:0.4rem}
+.card-price{font-weight:600;font-size:0.88rem;color:var(--text)}
+.card-price .original-price{font-size:0.72rem;color:var(--text-muted);text-decoration:line-through;display:inline;margin-right:0.3rem}
+.card-price .offer-price{color:var(--coral)}
+.card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:0.7rem;gap:0.5rem}
+.card-actions{display:flex;gap:0.5rem}
+.card-badge{font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;font-weight:600;padding:0.2rem 0.6rem;border-radius:20px}
+
 /* BADGES */
 .badge{display:inline-flex;align-items:center;padding:0.25rem 0.7rem;border-radius:20px;font-size:0.68rem;letter-spacing:1px;text-transform:uppercase;font-weight:600}
-.badge-active{background:#dcfce7;color:#16a34a}
-.badge-inactive{background:#fee2e2;color:#dc2626}
 .badge-offer{background:#fff7ed;color:var(--coral)}
 
 /* TOGGLE SWITCH */
@@ -92,9 +105,9 @@ tr:hover td{background:var(--cream)}
 
 /* ACTION BUTTONS */
 .action-btns{display:flex;gap:0.5rem}
-.btn-edit{background:none;border:1px solid var(--border);padding:0.35rem 0.7rem;border-radius:4px;font-size:0.7rem;cursor:pointer;color:var(--text-muted);font-family:'Inter',sans-serif;transition:all .2s}
+.btn-edit{background:none;border:1px solid var(--border);padding:0.35rem 0.7rem;border-radius:4px;font-size:0.7rem;cursor:pointer;color:var(--text-muted);font-family:'Inter',sans-serif;transition:all .2s;min-height:36px}
 .btn-edit:hover{border-color:var(--coral);color:var(--coral)}
-.btn-delete{background:none;border:1px solid var(--border);padding:0.35rem 0.7rem;border-radius:4px;font-size:0.7rem;cursor:pointer;color:var(--text-muted);font-family:'Inter',sans-serif;transition:all .2s}
+.btn-delete{background:none;border:1px solid var(--border);padding:0.35rem 0.7rem;border-radius:4px;font-size:0.7rem;cursor:pointer;color:var(--text-muted);font-family:'Inter',sans-serif;transition:all .2s;min-height:36px}
 .btn-delete:hover{border-color:var(--red);color:var(--red)}
 
 /* MODAL */
@@ -118,11 +131,8 @@ tr:hover td{background:var(--cream)}
 .form-check label{font-size:0.82rem;color:var(--text);cursor:pointer}
 .offer-fields{background:var(--cream-dark);border-radius:4px;padding:1rem;margin-bottom:1rem;display:none}
 .offer-fields.visible{display:block}
-
-/* IMAGE UPLOADER */
 .img-upload-area{border:2px dashed var(--border);border-radius:6px;padding:1.5rem;text-align:center;transition:all .2s;background:var(--cream);position:relative;overflow:hidden}
 .img-upload-area:hover,.img-upload-area.dragover{border-color:var(--coral);background:rgba(232,107,58,0.04)}
-/* El input file solo cubre el área de texto, no toda la caja */
 .img-upload-input-wrap{position:relative;display:inline-block;cursor:pointer}
 .img-upload-input-wrap input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;touch-action:manipulation;-webkit-tap-highlight-color:transparent;font-size:16px}
 .img-upload-preview{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:4px;display:none;margin-bottom:0.8rem}
@@ -131,14 +141,13 @@ tr:hover td{background:var(--cream)}
 .img-upload-text span{display:block;font-size:1.5rem;margin-bottom:0.4rem}
 .img-remove-btn{background:none;border:1px solid var(--border);padding:0.4rem 0.8rem;border-radius:4px;font-size:0.7rem;cursor:pointer;color:var(--red);font-family:'Inter',sans-serif;margin-top:0.5rem;display:none;transition:all .2s;min-height:36px}
 .img-remove-btn.visible{display:inline-block}
-
 .modal-footer{padding:0 1.5rem 2rem;display:flex;gap:0.8rem;justify-content:flex-end}
 .btn-cancel{background:none;border:1px solid var(--border);padding:0.7rem 1.4rem;border-radius:4px;font-size:0.78rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;color:var(--text-muted);font-family:'Inter',sans-serif;transition:all .2s;min-height:44px}
 .btn-cancel:hover{border-color:var(--coral);color:var(--coral)}
 .btn-save{background:var(--coral);color:white;border:none;padding:0.7rem 1.4rem;border-radius:4px;font-size:0.78rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;transition:background .2s;min-height:44px}
 .btn-save:hover{background:#C8512A}
 
-/* CONFIRM MODAL */
+/* CONFIRM */
 .confirm-overlay{position:fixed;inset:0;background:rgba(44,24,16,0.45);z-index:300;display:flex;align-items:flex-end;justify-content:center;padding:0;opacity:0;pointer-events:none;transition:opacity .3s}
 .confirm-overlay.open{opacity:1;pointer-events:all}
 .confirm-box{background:var(--white);border-radius:12px 12px 0 0;padding:2rem;width:100%;max-width:600px;text-align:center;transform:translateY(100%);transition:transform .35s cubic-bezier(.32,.72,0,1)}
@@ -161,17 +170,14 @@ tr:hover td{background:var(--cream)}
   .stats{grid-template-columns:repeat(2,1fr)}
   header{padding:0 1rem}
   .form-row{grid-template-columns:1fr}
-  th:nth-child(3),td:nth-child(3){display:none}
   .header-logo span{display:none}
-  .modal-overlay{align-items:flex-end}
+  /* Ocultar tabla, mostrar cards */
+  .table-wrap{display:none}
+  .cards-wrap{display:flex}
 }
 @media(max-width:480px){
   .stats{grid-template-columns:1fr 1fr}
-  table{font-size:0.8rem}
-  td,th{padding:0.6rem 0.5rem}
 }
-
-/* Desktop: modal centrado */
 @media(min-width:769px){
   .modal-overlay{align-items:center;padding:1rem}
   .modal{border-radius:8px;max-height:90vh;transform:translateY(20px)}
@@ -212,6 +218,8 @@ tr:hover td{background:var(--cream)}
       <div class="toolbar-title">Productos</div>
       <button class="add-btn" onclick="openModal()">+ Agregar producto</button>
     </div>
+
+    <!-- DESKTOP: tabla -->
     <div class="table-wrap">
       <table>
         <thead>
@@ -222,15 +230,20 @@ tr:hover td{background:var(--cream)}
             <th>Precio</th>
             <th>Oferta</th>
             <th>Estado</th>
-            <th style="width:120px">Acciones</th>
+            <th style="width:140px">Acciones</th>
           </tr>
         </thead>
         <tbody id="productsTable"></tbody>
       </table>
-      <div class="empty-state" id="emptyState" style="display:none">
-        <span>📦</span>
-        <p>No hay productos todavía. ¡Agregá el primero!</p>
+      <div class="empty-state" id="emptyStateDesktop" style="display:none">
+        <span>📦</span><p>No hay productos todavía. ¡Agregá el primero!</p>
       </div>
+    </div>
+
+    <!-- MOBILE: cards -->
+    <div class="cards-wrap" id="cardsWrap"></div>
+    <div class="empty-state" id="emptyStateMobile" style="display:none">
+      <span>📦</span><p>No hay productos todavía. ¡Agregá el primero!</p>
     </div>
   </main>
 </div>
@@ -245,7 +258,6 @@ tr:hover td{background:var(--cream)}
     </div>
     <div class="modal-body">
       <input type="hidden" id="editId">
-
       <div class="form-row">
         <div class="form-group">
           <label>Nombre del producto *</label>
@@ -257,27 +269,21 @@ tr:hover td{background:var(--cream)}
           <datalist id="catList"></datalist>
         </div>
       </div>
-
       <div class="form-group">
         <label>Descripción</label>
         <textarea id="fDesc" placeholder="Describe el producto brevemente..."></textarea>
       </div>
-
       <div class="form-group">
         <label>Foto del producto</label>
         <div class="img-upload-area" id="imgUploadArea">
           <img class="img-upload-preview" id="imgPreview" src="" alt="preview">
           <div class="img-upload-input-wrap" id="imgUploadText">
             <input type="file" id="fImg" accept="image/*" onchange="handleImageUpload(event)">
-            <div class="img-upload-text">
-              <span>📷</span>
-              Tocá para subir una foto
-            </div>
+            <div class="img-upload-text"><span>📷</span>Tocá para subir una foto</div>
           </div>
           <button type="button" class="img-remove-btn" id="imgRemoveBtn" onclick="removeImage(event)">✕ Quitar foto</button>
         </div>
       </div>
-
       <div class="form-row">
         <div class="form-group">
           <label>Precio ($) *</label>
@@ -288,22 +294,18 @@ tr:hover td{background:var(--cream)}
           <input type="text" id="fEmoji" placeholder="👗">
         </div>
       </div>
-
       <div class="form-group">
         <label>Talles (separados por coma)</label>
         <input type="text" id="fSizes" placeholder="Ej: XS, S, M, L, XL" autocomplete="off">
       </div>
-
       <div class="form-check">
         <input type="checkbox" id="fActive" checked>
         <label for="fActive">Producto activo (visible en la tienda)</label>
       </div>
-
       <div class="form-check">
         <input type="checkbox" id="fOnOffer" onchange="toggleOfferFields()">
         <label for="fOnOffer">🔥 Está en oferta</label>
       </div>
-
       <div class="offer-fields" id="offerFields">
         <div class="form-group" style="margin-bottom:0">
           <label>Precio original (antes de la oferta)</label>
@@ -331,29 +333,25 @@ tr:hover td{background:var(--cream)}
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
 const PASSWORD = 'kala2026';
 const STORAGE_KEY = 'kala_products';
-
 const DEFAULT_PRODUCTS = [
-  {id:1,name:"Camisa lino oversize",category:"Remeras",price:18500,desc:"Camisa de lino premium con corte oversize. Perfecta para el día a día. Disponible en blanco y natural.",sizes:["XS","S","M","L","XL"],active:true,emoji:"👕",onOffer:false,originalPrice:null},
-  {id:2,name:"Pantalón palazzo",category:"Pantalones",price:24000,desc:"Pantalón de tiro alto con caída amplia. Tela liviana y fresca ideal para verano.",sizes:["S","M","L"],active:true,emoji:"👖",onOffer:false,originalPrice:null},
-  {id:3,name:"Vestido midi floral",category:"Vestidos",price:24900,desc:"Vestido midi con estampado floral exclusivo. Escote en V y manga corta con volado.",sizes:["XS","S","M","L"],active:true,emoji:"👗",onOffer:true,originalPrice:32000},
-  {id:4,name:"Blazer cropped",category:"Abrigos",price:42000,desc:"Blazer cropped de fibrana. Ideal para looks de oficina o salidas nocturnas.",sizes:["S","M","L","XL"],active:true,emoji:"🧥",onOffer:false,originalPrice:null},
-  {id:5,name:"Falda midi plisada",category:"Faldas",price:21000,desc:"Falda midi plisada con cintura elástica. Cae perfecto y es súper cómoda.",sizes:["XS","S","M","L"],active:true,emoji:"👗",onOffer:false,originalPrice:null},
-  {id:6,name:"Top bandeau",category:"Remeras",price:8500,desc:"Top bandeau con breteles finos. Combinalo con cualquier pantalón o falda.",sizes:["XS","S","M"],active:true,emoji:"👙",onOffer:true,originalPrice:12000},
-  {id:7,name:"Cartera de cuero",category:"Accesorios",price:28000,desc:"Cartera de cuero ecológico con cierre metálico dorado. Ideal para el día a día.",sizes:["Único"],active:true,emoji:"👜",onOffer:false,originalPrice:null},
-  {id:8,name:"Conjunto lino",category:"Conjuntos",price:38500,desc:"Conjunto de camisa y pantalón en lino natural. Cómodo, fresco y muy elegante.",sizes:["S","M","L"],active:true,emoji:"🌿",onOffer:true,originalPrice:48000}
+  {id:1,name:"Camisa lino oversize",category:"Remeras",price:18500,desc:"Camisa de lino premium con corte oversize.",sizes:["XS","S","M","L","XL"],active:true,emoji:"👕",onOffer:false,originalPrice:null},
+  {id:2,name:"Pantalón palazzo",category:"Pantalones",price:24000,desc:"Pantalón de tiro alto con caída amplia.",sizes:["S","M","L"],active:true,emoji:"👖",onOffer:false,originalPrice:null},
+  {id:3,name:"Vestido midi floral",category:"Vestidos",price:24900,desc:"Vestido midi con estampado floral exclusivo.",sizes:["XS","S","M","L"],active:true,emoji:"👗",onOffer:true,originalPrice:32000},
+  {id:4,name:"Blazer cropped",category:"Abrigos",price:42000,desc:"Blazer cropped de fibrana.",sizes:["S","M","L","XL"],active:true,emoji:"🧥",onOffer:false,originalPrice:null},
+  {id:5,name:"Falda midi plisada",category:"Faldas",price:21000,desc:"Falda midi plisada con cintura elástica.",sizes:["XS","S","M","L"],active:true,emoji:"👗",onOffer:false,originalPrice:null},
+  {id:6,name:"Top bandeau",category:"Remeras",price:8500,desc:"Top bandeau con breteles finos.",sizes:["XS","S","M"],active:true,emoji:"👙",onOffer:true,originalPrice:12000},
+  {id:7,name:"Cartera de cuero",category:"Accesorios",price:28000,desc:"Cartera de cuero ecológico.",sizes:["Único"],active:true,emoji:"👜",onOffer:false,originalPrice:null},
+  {id:8,name:"Conjunto lino",category:"Conjuntos",price:38500,desc:"Conjunto de camisa y pantalón en lino.",sizes:["S","M","L"],active:true,emoji:"🌿",onOffer:true,originalPrice:48000}
 ];
 
 let products = [];
-let deleteTargetId = null;
 let currentImgBase64 = null;
 
-// ─── IMAGE UPLOAD ───
 function handleImageUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -364,8 +362,8 @@ function handleImageUpload(event) {
       const canvas = document.createElement('canvas');
       const MAX = 800;
       let w = img.width, h = img.height;
-      if (w > h) { if (w > MAX) { h = h * MAX / w; w = MAX; } }
-      else { if (h > MAX) { w = w * MAX / h; h = MAX; } }
+      if (w > h) { if (w > MAX) { h = h*MAX/w; w = MAX; } }
+      else { if (h > MAX) { w = w*MAX/h; h = MAX; } }
       canvas.width = w; canvas.height = h;
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
       currentImgBase64 = canvas.toDataURL('image/jpeg', 0.8);
@@ -389,7 +387,6 @@ function removeImage(e) {
   document.getElementById('fImg').value = '';
 }
 
-// ─── AUTH ───
 function login() {
   const val = document.getElementById('passInput').value.trim().toLowerCase();
   if (val === PASSWORD) {
@@ -409,13 +406,10 @@ function logout() {
   document.getElementById('loginError').style.display = 'none';
 }
 
-// ─── PRODUCTS ───
 function loadProducts() {
   const saved = localStorage.getItem(STORAGE_KEY);
   products = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
-  renderStats();
-  renderTable();
-  updateCatList();
+  renderStats(); renderTable(); renderCards(); updateCatList();
 }
 function saveProducts() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
@@ -427,7 +421,6 @@ function nextId() {
   return products.length ? Math.max(...products.map(p=>p.id)) + 1 : 1;
 }
 
-// ─── STATS ───
 function renderStats() {
   const total = products.length;
   const active = products.filter(p=>p.active).length;
@@ -441,47 +434,56 @@ function renderStats() {
   `;
 }
 
-// ─── TABLE ───
 function renderTable() {
   const tbody = document.getElementById('productsTable');
-  const empty = document.getElementById('emptyState');
-  if (!products.length) {
-    tbody.innerHTML = '';
-    empty.style.display = 'block';
-    return;
-  }
+  const empty = document.getElementById('emptyStateDesktop');
+  if (!products.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
   tbody.innerHTML = products.map(p => `
     <tr>
-      <td>
-        <div class="prod-emoji">
-          ${p.img ? `<img src="${p.img}" alt="${p.name}">` : (p.emoji || '👗')}
-        </div>
-      </td>
-      <td>
-        <div class="prod-name">${p.name}</div>
-        <div class="prod-cat">${p.sizes ? p.sizes.join(', ') : ''}</div>
-      </td>
+      <td><div class="prod-emoji">${p.img ? `<img src="${p.img}" alt="${p.name}">` : (p.emoji||'👗')}</div></td>
+      <td><div class="prod-name">${p.name}</div><div class="prod-sizes">${p.sizes?p.sizes.join(', '):''}</div></td>
       <td><span class="badge" style="background:var(--cream-dark);color:var(--text-muted)">${p.category}</span></td>
-      <td class="price-cell">
-        ${p.onOffer && p.originalPrice ? `<span class="original-price">${formatPrice(p.originalPrice)}</span><span class="offer-price">${formatPrice(p.price)}</span>` : formatPrice(p.price)}
-      </td>
-      <td>
-        ${p.onOffer ? `<span class="badge badge-offer">🔥 Oferta</span>` : '<span style="color:var(--text-muted);font-size:0.75rem">—</span>'}
-      </td>
-      <td>
-        <label class="toggle" title="${p.active ? 'Activo' : 'Inactivo'}">
-          <input type="checkbox" ${p.active ? 'checked' : ''} onchange="toggleActive(${p.id})">
-          <span class="toggle-slider"></span>
-        </label>
-      </td>
-      <td>
-        <div class="action-btns">
-          <button class="btn-edit" onclick="openModal(${p.id})">✏️ Editar</button>
-          <button class="btn-delete" onclick="confirmDelete(${p.id}, '${p.name.replace(/'/g,"\\'")}')">🗑️</button>
-        </div>
-      </td>
+      <td class="price-cell">${p.onOffer&&p.originalPrice?`<span class="original-price">${formatPrice(p.originalPrice)}</span><span class="offer-price">${formatPrice(p.price)}</span>`:formatPrice(p.price)}</td>
+      <td>${p.onOffer?`<span class="badge badge-offer">🔥 Oferta</span>`:'<span style="color:var(--text-muted);font-size:0.75rem">—</span>'}</td>
+      <td><label class="toggle"><input type="checkbox" ${p.active?'checked':''} onchange="toggleActive(${p.id})"><span class="toggle-slider"></span></label></td>
+      <td><div class="action-btns">
+        <button class="btn-edit" onclick="openModal(${p.id})">✏️ Editar</button>
+        <button class="btn-delete" onclick="confirmDelete(${p.id},'${p.name.replace(/'/g,"\\'")}')">🗑️</button>
+      </div></td>
     </tr>
+  `).join('');
+}
+
+function renderCards() {
+  const wrap = document.getElementById('cardsWrap');
+  const empty = document.getElementById('emptyStateMobile');
+  if (!products.length) { wrap.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  wrap.innerHTML = products.map(p => `
+    <div class="product-card">
+      <div class="card-img">${p.img ? `<img src="${p.img}" alt="${p.name}">` : (p.emoji||'👗')}</div>
+      <div class="card-body">
+        <div class="card-name">${p.name}</div>
+        <div class="card-meta">${p.category} · ${p.sizes?p.sizes.join(', '):''}</div>
+        <div class="card-price">
+          ${p.onOffer&&p.originalPrice
+            ? `<span class="original-price">${formatPrice(p.originalPrice)}</span><span class="offer-price">${formatPrice(p.price)}</span>`
+            : formatPrice(p.price)}
+          ${p.onOffer ? '<span class="card-badge badge-offer" style="margin-left:0.4rem">🔥 Oferta</span>' : ''}
+        </div>
+        <div class="card-footer">
+          <label class="toggle">
+            <input type="checkbox" ${p.active?'checked':''} onchange="toggleActive(${p.id})">
+            <span class="toggle-slider"></span>
+          </label>
+          <div class="card-actions">
+            <button class="btn-edit" onclick="openModal(${p.id})">✏️ Editar</button>
+            <button class="btn-delete" onclick="confirmDelete(${p.id},'${p.name.replace(/'/g,"\\'")}')">🗑️</button>
+          </div>
+        </div>
+      </div>
+    </div>
   `).join('');
 }
 
@@ -489,9 +491,7 @@ function toggleActive(id) {
   const p = products.find(x=>x.id===id);
   if (!p) return;
   p.active = !p.active;
-  saveProducts();
-  renderStats();
-  renderTable();
+  saveProducts(); renderStats(); renderTable(); renderCards();
   showToast(p.active ? `"${p.name}" activado ✓` : `"${p.name}" desactivado`);
 }
 
@@ -500,7 +500,6 @@ function updateCatList() {
   document.getElementById('catList').innerHTML = cats.map(c=>`<option value="${c}">`).join('');
 }
 
-// ─── MODAL ───
 function handleOverlayClick(e) {
   if (e.target === document.getElementById('modalOverlay')) closeModal();
 }
@@ -562,80 +561,46 @@ function closeModal() {
   document.body.style.overflow = '';
 }
 function toggleOfferFields() {
-  const checked = document.getElementById('fOnOffer').checked;
-  document.getElementById('offerFields').classList.toggle('visible', checked);
+  document.getElementById('offerFields').classList.toggle('visible', document.getElementById('fOnOffer').checked);
 }
 function saveProduct() {
   const name = document.getElementById('fName').value.trim();
   const category = document.getElementById('fCategory').value.trim();
   const price = parseFloat(document.getElementById('fPrice').value);
-  if (!name || !category || !price) {
-    showToast('Completá nombre, categoría y precio');
-    return;
-  }
-  const sizesRaw = document.getElementById('fSizes').value;
-  const sizes = sizesRaw ? sizesRaw.split(',').map(s=>s.trim()).filter(Boolean) : ['Único'];
+  if (!name || !category || !price) { showToast('Completá nombre, categoría y precio'); return; }
+  const sizes = document.getElementById('fSizes').value ? document.getElementById('fSizes').value.split(',').map(s=>s.trim()).filter(Boolean) : ['Único'];
   const onOffer = document.getElementById('fOnOffer').checked;
-  const originalPrice = onOffer ? parseFloat(document.getElementById('fOriginalPrice').value) || null : null;
+  const originalPrice = onOffer ? parseFloat(document.getElementById('fOriginalPrice').value)||null : null;
   const editId = document.getElementById('editId').value;
   if (editId) {
     const idx = products.findIndex(p=>p.id===parseInt(editId));
     if (idx > -1) {
-      products[idx] = {
-        ...products[idx],
-        name, category,
-        desc: document.getElementById('fDesc').value.trim(),
-        price,
-        emoji: document.getElementById('fEmoji').value.trim() || '👗',
-        img: currentImgBase64,
-        sizes,
-        active: document.getElementById('fActive').checked,
-        onOffer, originalPrice
-      };
+      products[idx] = {...products[idx], name, category, desc:document.getElementById('fDesc').value.trim(), price, emoji:document.getElementById('fEmoji').value.trim()||'👗', img:currentImgBase64, sizes, active:document.getElementById('fActive').checked, onOffer, originalPrice};
       showToast(`"${name}" actualizado ✓`);
     }
   } else {
-    products.push({
-      id: nextId(), name, category,
-      desc: document.getElementById('fDesc').value.trim(),
-      price,
-      emoji: document.getElementById('fEmoji').value.trim() || '👗',
-      sizes,
-      active: document.getElementById('fActive').checked,
-      onOffer, originalPrice,
-      img: currentImgBase64
-    });
+    products.push({id:nextId(), name, category, desc:document.getElementById('fDesc').value.trim(), price, emoji:document.getElementById('fEmoji').value.trim()||'👗', sizes, active:document.getElementById('fActive').checked, onOffer, originalPrice, img:currentImgBase64});
     showToast(`"${name}" agregado ✓`);
   }
-  saveProducts();
-  renderStats();
-  renderTable();
-  updateCatList();
-  closeModal();
+  saveProducts(); renderStats(); renderTable(); renderCards(); updateCatList(); closeModal();
 }
 
-// ─── DELETE ───
 function confirmDelete(id, name) {
-  deleteTargetId = id;
   document.getElementById('confirmText').textContent = `¿Seguro que querés eliminar "${name}"? Esta acción no se puede deshacer.`;
   document.getElementById('confirmBtn').onclick = () => deleteProduct(id);
   document.getElementById('confirmOverlay').classList.add('open');
 }
 function closeConfirm() {
   document.getElementById('confirmOverlay').classList.remove('open');
-  deleteTargetId = null;
 }
 function deleteProduct(id) {
   const p = products.find(x=>x.id===id);
   products = products.filter(x=>x.id!==id);
-  saveProducts();
-  renderStats();
-  renderTable();
+  saveProducts(); renderStats(); renderTable(); renderCards();
   closeConfirm();
   showToast(`"${p?.name}" eliminado`);
 }
 
-// ─── TOAST ───
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
