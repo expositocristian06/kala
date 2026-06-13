@@ -70,7 +70,6 @@ tr:hover td{background:var(--cream)}
 .card-price .offer-price{color:var(--coral)}
 .card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:0.7rem;gap:0.5rem;flex-wrap:wrap}
 .card-actions{display:flex;gap:0.5rem;flex-wrap:wrap}
-.card-badge{font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;font-weight:600;padding:0.2rem 0.6rem;border-radius:20px}
 .badge{display:inline-flex;align-items:center;padding:0.25rem 0.7rem;border-radius:20px;font-size:0.68rem;letter-spacing:1px;text-transform:uppercase;font-weight:600}
 .badge-offer{background:#fff7ed;color:var(--coral)}
 .toggle{position:relative;display:inline-block;width:44px;height:24px;cursor:pointer}
@@ -134,11 +133,12 @@ tr:hover td{background:var(--cream)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .empty-state{text-align:center;padding:4rem 2rem;color:var(--text-muted)}
 .empty-state span{font-size:3rem;display:block;margin-bottom:1rem}
+.saving-indicator{font-size:0.72rem;color:var(--text-muted);letter-spacing:1px;opacity:0;transition:opacity .3s}
+.saving-indicator.show{opacity:1}
 @media(max-width:768px){
   main{padding:1rem}.stats{grid-template-columns:repeat(2,1fr)}header{padding:0 1rem}
   .form-row{grid-template-columns:1fr}.header-logo span{display:none}
   .table-wrap{display:none}.cards-wrap{display:flex}
-  .header-actions .motor-btn span,.view-store-btn span{display:inline}
 }
 @media(max-width:480px){.stats{grid-template-columns:1fr 1fr}}
 @media(min-width:769px){
@@ -163,6 +163,7 @@ tr:hover td{background:var(--cream)}
   <header>
     <div class="header-logo">Kala <span>Panel Admin</span></div>
     <div class="header-actions">
+      <span class="saving-indicator" id="savingIndicator">Guardando...</span>
       <a href="motor.html" class="motor-btn">🤖 Motor</a>
       <a href="/" target="_blank" class="view-store-btn">🛍️ Ver tienda</a>
       <button class="logout-btn" onclick="logout()">Salir</button>
@@ -268,249 +269,384 @@ tr:hover td{background:var(--cream)}
 </div>
 
 <div class="toast" id="toast"></div>
-<script>
-const PASSWORD='kala2026';
-const STORAGE_KEY='kala_products';
-const SALES_KEY='kala_sales';
-const DEFAULT_PRODUCTS=[
-  {id:1,name:"Camisa lino oversize",category:"Remeras",price:18500,desc:"Camisa de lino premium con corte oversize.",sizes:["XS","S","M","L","XL"],active:true,emoji:"👕",onOffer:false,originalPrice:null,stock:15,season:"verano"},
-  {id:2,name:"Pantalón palazzo",category:"Pantalones",price:24000,desc:"Pantalón de tiro alto con caída amplia.",sizes:["S","M","L"],active:true,emoji:"👖",onOffer:false,originalPrice:null,stock:8,season:"all"},
-  {id:3,name:"Vestido midi floral",category:"Vestidos",price:24900,desc:"Vestido midi con estampado floral.",sizes:["XS","S","M","L"],active:true,emoji:"👗",onOffer:true,originalPrice:32000,stock:6,season:"verano"},
-  {id:4,name:"Blazer cropped",category:"Abrigos",price:42000,desc:"Blazer cropped de fibrana.",sizes:["S","M","L","XL"],active:true,emoji:"🧥",onOffer:false,originalPrice:null,stock:10,season:"invierno"},
-  {id:5,name:"Falda midi plisada",category:"Faldas",price:21000,desc:"Falda midi plisada.",sizes:["XS","S","M","L"],active:true,emoji:"👗",onOffer:false,originalPrice:null,stock:4,season:"all"},
-  {id:6,name:"Top bandeau",category:"Remeras",price:8500,desc:"Top bandeau con breteles finos.",sizes:["XS","S","M"],active:true,emoji:"👙",onOffer:true,originalPrice:12000,stock:20,season:"verano"},
-  {id:7,name:"Cartera de cuero",category:"Accesorios",price:28000,desc:"Cartera de cuero ecológico.",sizes:["Único"],active:true,emoji:"👜",onOffer:false,originalPrice:null,stock:5,season:"all"},
-  {id:8,name:"Conjunto lino",category:"Conjuntos",price:38500,desc:"Conjunto de camisa y pantalón en lino.",sizes:["S","M","L"],active:true,emoji:"🌿",onOffer:true,originalPrice:48000,stock:7,season:"verano"}
-];
-let products=[];
-let currentImgBase64=null;
-let sellTargetId=null;
-let sellQty=1;
 
-function handleImageUpload(event){
-  const file=event.target.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=function(e){
-    const img=new Image();
-    img.onload=function(){
-      const canvas=document.createElement('canvas');const MAX=800;let w=img.width,h=img.height;
-      if(w>h){if(w>MAX){h=h*MAX/w;w=MAX}}else{if(h>MAX){w=w*MAX/h;h=MAX}}
-      canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(img,0,0,w,h);
-      currentImgBase64=canvas.toDataURL('image/jpeg',0.8);
-      document.getElementById('imgPreview').src=currentImgBase64;
-      document.getElementById('imgPreview').classList.add('visible');
-      document.getElementById('imgUploadText').style.display='none';
-      document.getElementById('imgRemoveBtn').classList.add('visible');
-    };img.src=e.target.result;
-  };reader.readAsDataURL(file);
-}
-function removeImage(e){
-  e.stopPropagation();currentImgBase64=null;
-  document.getElementById('imgPreview').src='';
-  document.getElementById('imgPreview').classList.remove('visible');
-  document.getElementById('imgUploadText').style.display='';
-  document.getElementById('imgRemoveBtn').classList.remove('visible');
-  document.getElementById('fImg').value='';
-}
-function login(){
-  const val=document.getElementById('passInput').value.trim().toLowerCase();
-  if(val===PASSWORD){
-    document.getElementById('loginScreen').style.display='none';
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://xaahdvcjgcxuiftobrtw.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhhYWhkdmNqZ2N4dWlmdG9icnR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNzgxMjAsImV4cCI6MjA5Njg1NDEyMH0.pac1QJOIFl3P_WrjR9Qq1IIhk_aSK67oJ3qbMhaYW-Y';
+const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const PASSWORD = 'kala2026';
+let products = [];
+let currentImgBase64 = null;
+let sellTargetId = null;
+let sellQty = 1;
+
+// ── AUTH ──
+function login() {
+  const val = document.getElementById('passInput').value.trim().toLowerCase();
+  if (val === PASSWORD) {
+    document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('app').classList.add('visible');
     loadProducts();
-  }else{
-    document.getElementById('loginError').style.display='block';
-    document.getElementById('passInput').value='';document.getElementById('passInput').focus();
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+    document.getElementById('passInput').value = '';
+    document.getElementById('passInput').focus();
   }
 }
-function logout(){
-  document.getElementById('loginScreen').style.display='flex';
+function logout() {
+  document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('app').classList.remove('visible');
-  document.getElementById('passInput').value='';
-  document.getElementById('loginError').style.display='none';
+  document.getElementById('passInput').value = '';
+  document.getElementById('loginError').style.display = 'none';
 }
-function loadProducts(){
-  const saved=localStorage.getItem(STORAGE_KEY);
-  products=saved?JSON.parse(saved):JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
-  // Asegurar que productos viejos tengan los campos nuevos
-  products.forEach(p=>{if(p.stock===undefined)p.stock=10;if(p.season===undefined)p.season='all'});
-  renderStats();renderTable();renderCards();updateCatList();
+
+// ── SUPABASE CRUD ──
+async function loadProducts() {
+  const { data, error } = await sbClient
+    .from('products')
+    .select('*')
+    .order('created_at', { ascending: true });
+  if (error) { showToast('Error cargando productos'); console.error(error); return; }
+  products = (data || []).map(dbToProduct);
+  renderStats(); renderTable(); renderCards(); updateCatList();
 }
-function saveProducts(){localStorage.setItem(STORAGE_KEY,JSON.stringify(products))}
-function formatPrice(p){return '$'+Number(p).toLocaleString('es-AR')}
-function nextId(){return products.length?Math.max(...products.map(p=>p.id))+1:1}
-function stockClass(s){return s===0?'stock-zero':(s<=3?'stock-low':'stock-ok')}
-function renderStats(){
-  const total=products.length;
-  const active=products.filter(p=>p.active).length;
-  const lowStock=products.filter(p=>p.stock<=3).length;
-  const offers=products.filter(p=>p.onOffer).length;
-  document.getElementById('stats').innerHTML=`
+
+async function upsertProduct(p) {
+  showSaving();
+  const row = productToDb(p);
+  const { error } = await sbClient.from('products').upsert(row, { onConflict: 'id' });
+  hideSaving();
+  if (error) { showToast('Error guardando en la base de datos'); console.error(error); }
+}
+
+async function deleteProductDb(id) {
+  showSaving();
+  const { error } = await sbClient.from('products').delete().eq('id', id);
+  hideSaving();
+  if (error) { showToast('Error eliminando producto'); console.error(error); }
+}
+
+// ── MAPEO DB <-> JS ──
+function dbToProduct(row) {
+  return {
+    id: row.id,
+    name: row.name,
+    category: row.category,
+    price: Number(row.price),
+    originalPrice: row.original_price ? Number(row.original_price) : null,
+    onOffer: !!row.original_price,
+    stock: row.stock || 0,
+    season: row.season || 'all',
+    active: row.active !== false,
+    img: row.img || null,
+    emoji: row.img ? null : '👗',
+    sizes: row.sizes ? row.sizes : ['Único'],
+    desc: row.desc || '',
+    sales: row.sales || 0,
+    createdAt: row.created_at
+  };
+}
+function productToDb(p) {
+  return {
+    id: p.id,
+    name: p.name,
+    category: p.category,
+    price: p.price,
+    original_price: p.originalPrice || null,
+    stock: p.stock,
+    season: p.season || 'all',
+    active: p.active,
+    img: p.img || null,
+    sales: p.sales || 0,
+    sizes: p.sizes || ['Único'],
+    desc: p.desc || ''
+  };
+}
+
+function nextId() {
+  return 'prod_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+}
+
+// ── SAVING INDICATOR ──
+function showSaving() { document.getElementById('savingIndicator').classList.add('show'); }
+function hideSaving() {
+  const el = document.getElementById('savingIndicator');
+  el.textContent = '✓ Guardado';
+  setTimeout(() => { el.classList.remove('show'); el.textContent = 'Guardando...'; }, 1500);
+}
+
+// ── RENDER ──
+function formatPrice(p) { return '$' + Number(p).toLocaleString('es-AR'); }
+function stockClass(s) { return s === 0 ? 'stock-zero' : (s <= 3 ? 'stock-low' : 'stock-ok'); }
+
+function renderStats() {
+  const total = products.length;
+  const active = products.filter(p => p.active).length;
+  const lowStock = products.filter(p => p.stock <= 3).length;
+  const offers = products.filter(p => p.onOffer).length;
+  document.getElementById('stats').innerHTML = `
     <div class="stat-card"><div class="stat-label">Total productos</div><div class="stat-value">${total}</div></div>
     <div class="stat-card"><div class="stat-label">Activos</div><div class="stat-value coral">${active}</div></div>
     <div class="stat-card"><div class="stat-label">Stock bajo</div><div class="stat-value">${lowStock}</div></div>
     <div class="stat-card"><div class="stat-label">En oferta</div><div class="stat-value coral">${offers}</div></div>`;
 }
-function renderTable(){
-  const tbody=document.getElementById('productsTable');const empty=document.getElementById('emptyStateDesktop');
-  if(!products.length){tbody.innerHTML='';empty.style.display='block';return}
-  empty.style.display='none';
-  tbody.innerHTML=products.map(p=>`
+
+function renderTable() {
+  const tbody = document.getElementById('productsTable');
+  const empty = document.getElementById('emptyStateDesktop');
+  if (!products.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  tbody.innerHTML = products.map(p => `
     <tr>
-      <td><div class="prod-emoji">${p.img?`<img src="${p.img}" alt="${p.name}">`:(p.emoji||'👗')}</div></td>
-      <td><div class="prod-name">${p.name}</div><div class="prod-sizes">${p.sizes?p.sizes.join(', '):''}</div></td>
+      <td><div class="prod-emoji">${p.img ? `<img src="${p.img}" alt="${p.name}">` : (p.emoji || '👗')}</div></td>
+      <td><div class="prod-name">${p.name}</div><div class="prod-sizes">${p.sizes ? p.sizes.join(', ') : ''}</div></td>
       <td><span class="badge" style="background:var(--cream-dark);color:var(--text-muted)">${p.category}</span></td>
-      <td class="price-cell">${p.onOffer&&p.originalPrice?`<span class="original-price">${formatPrice(p.originalPrice)}</span><span class="offer-price">${formatPrice(p.price)}</span>`:formatPrice(p.price)}</td>
+      <td class="price-cell">${p.onOffer && p.originalPrice ? `<span class="original-price">${formatPrice(p.originalPrice)}</span><span class="offer-price">${formatPrice(p.price)}</span>` : formatPrice(p.price)}</td>
       <td><span class="stock-pill ${stockClass(p.stock)}">${p.stock} u.</span></td>
-      <td><label class="toggle"><input type="checkbox" ${p.active?'checked':''} onchange="toggleActive(${p.id})"><span class="toggle-slider"></span></label></td>
+      <td><label class="toggle"><input type="checkbox" ${p.active ? 'checked' : ''} onchange="toggleActive('${p.id}')"><span class="toggle-slider"></span></label></td>
       <td><div class="action-btns">
-        <button class="btn-sell" onclick="openSell(${p.id})">🛒 Vendí</button>
-        <button class="btn-edit" onclick="openModal(${p.id})">✏️</button>
-        <button class="btn-delete" onclick="confirmDelete(${p.id},'${p.name.replace(/'/g,"\\'")}')">🗑️</button>
+        <button class="btn-sell" onclick="openSell('${p.id}')">🛒 Vendí</button>
+        <button class="btn-edit" onclick="openModal('${p.id}')">✏️</button>
+        <button class="btn-delete" onclick="confirmDelete('${p.id}','${p.name.replace(/'/g, "\\'")}')">🗑️</button>
       </div></td>
     </tr>`).join('');
 }
-function renderCards(){
-  const wrap=document.getElementById('cardsWrap');const empty=document.getElementById('emptyStateMobile');
-  if(!products.length){wrap.innerHTML='';empty.style.display='block';return}
-  empty.style.display='none';
-  wrap.innerHTML=products.map(p=>`
+
+function renderCards() {
+  const wrap = document.getElementById('cardsWrap');
+  const empty = document.getElementById('emptyStateMobile');
+  if (!products.length) { wrap.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  wrap.innerHTML = products.map(p => `
     <div class="product-card">
-      <div class="card-img">${p.img?`<img src="${p.img}" alt="${p.name}">`:(p.emoji||'👗')}</div>
+      <div class="card-img">${p.img ? `<img src="${p.img}" alt="${p.name}">` : (p.emoji || '👗')}</div>
       <div class="card-body">
         <div class="card-name">${p.name}</div>
-        <div class="card-meta">${p.category} · ${p.sizes?p.sizes.join(', '):''} · <span class="stock-pill ${stockClass(p.stock)}">${p.stock} u.</span></div>
-        <div class="card-price">${p.onOffer&&p.originalPrice?`<span class="original-price">${formatPrice(p.originalPrice)}</span><span class="offer-price">${formatPrice(p.price)}</span>`:formatPrice(p.price)}${p.onOffer?'<span class="card-badge badge-offer" style="margin-left:0.4rem">🔥 Oferta</span>':''}</div>
+        <div class="card-meta">${p.category} · ${p.sizes ? p.sizes.join(', ') : ''} · <span class="stock-pill ${stockClass(p.stock)}">${p.stock} u.</span></div>
+        <div class="card-price">${p.onOffer && p.originalPrice ? `<span class="original-price">${formatPrice(p.originalPrice)}</span><span class="offer-price">${formatPrice(p.price)}</span>` : formatPrice(p.price)}${p.onOffer ? '<span class="badge badge-offer" style="margin-left:0.4rem">🔥 Oferta</span>' : ''}</div>
         <div class="card-footer">
-          <label class="toggle"><input type="checkbox" ${p.active?'checked':''} onchange="toggleActive(${p.id})"><span class="toggle-slider"></span></label>
+          <label class="toggle"><input type="checkbox" ${p.active ? 'checked' : ''} onchange="toggleActive('${p.id}')"><span class="toggle-slider"></span></label>
           <div class="card-actions">
-            <button class="btn-sell" onclick="openSell(${p.id})">🛒 Vendí</button>
-            <button class="btn-edit" onclick="openModal(${p.id})">✏️ Editar</button>
-            <button class="btn-delete" onclick="confirmDelete(${p.id},'${p.name.replace(/'/g,"\\'")}')">🗑️</button>
+            <button class="btn-sell" onclick="openSell('${p.id}')">🛒 Vendí</button>
+            <button class="btn-edit" onclick="openModal('${p.id}')">✏️ Editar</button>
+            <button class="btn-delete" onclick="confirmDelete('${p.id}','${p.name.replace(/'/g, "\\'")}')">🗑️</button>
           </div>
         </div>
       </div>
     </div>`).join('');
 }
-function toggleActive(id){
-  const p=products.find(x=>x.id===id);if(!p)return;
-  p.active=!p.active;saveProducts();renderStats();renderTable();renderCards();
-  showToast(p.active?`"${p.name}" activado ✓`:`"${p.name}" desactivado`);
+
+function updateCatList() {
+  const cats = [...new Set(products.map(p => p.category))];
+  document.getElementById('catList').innerHTML = cats.map(c => `<option value="${c}">`).join('');
 }
-function updateCatList(){
-  const cats=[...new Set(products.map(p=>p.category))];
-  document.getElementById('catList').innerHTML=cats.map(c=>`<option value="${c}">`).join('');
+
+// ── TOGGLE ACTIVE ──
+async function toggleActive(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  p.active = !p.active;
+  renderStats(); renderTable(); renderCards();
+  await upsertProduct(p);
+  showToast(p.active ? `"${p.name}" activado ✓` : `"${p.name}" desactivado`);
 }
+
 // ── VENTAS ──
-function getSales(){const s=localStorage.getItem(SALES_KEY);return s?JSON.parse(s):[]}
-function saveSales(sales){localStorage.setItem(SALES_KEY,JSON.stringify(sales))}
-function openSell(id){
-  const p=products.find(x=>x.id===id);if(!p)return;
-  if(p.stock<=0){showToast(`"${p.name}" no tiene stock`);return}
-  sellTargetId=id;sellQty=1;
-  document.getElementById('sellTitle').textContent=`Vendí: ${p.name}`;
-  document.getElementById('sellText').textContent=`Stock actual: ${p.stock} unidades. ¿Cuántas vendiste?`;
-  document.getElementById('sellQty').textContent=sellQty;
+function openSell(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  if (p.stock <= 0) { showToast(`"${p.name}" no tiene stock`); return; }
+  sellTargetId = id; sellQty = 1;
+  document.getElementById('sellTitle').textContent = `Vendí: ${p.name}`;
+  document.getElementById('sellText').textContent = `Stock actual: ${p.stock} unidades. ¿Cuántas vendiste?`;
+  document.getElementById('sellQty').textContent = sellQty;
   document.getElementById('sellOverlay').classList.add('open');
-  document.body.style.overflow='hidden';
+  document.body.style.overflow = 'hidden';
 }
-function changeQty(delta){
-  const p=products.find(x=>x.id===sellTargetId);if(!p)return;
-  sellQty=Math.max(1,Math.min(p.stock,sellQty+delta));
-  document.getElementById('sellQty').textContent=sellQty;
+function changeQty(delta) {
+  const p = products.find(x => x.id === sellTargetId);
+  if (!p) return;
+  sellQty = Math.max(1, Math.min(p.stock, sellQty + delta));
+  document.getElementById('sellQty').textContent = sellQty;
 }
-function confirmSell(){
-  const p=products.find(x=>x.id===sellTargetId);if(!p)return;
-  p.stock=Math.max(0,p.stock-sellQty);
-  const sales=getSales();
-  sales.push({productId:p.id,productName:p.name,qty:sellQty,price:p.price,date:new Date().toISOString()});
-  saveSales(sales);saveProducts();
-  renderStats();renderTable();renderCards();closeSell();
+async function confirmSell() {
+  const p = products.find(x => x.id === sellTargetId);
+  if (!p) return;
+  p.stock = Math.max(0, p.stock - sellQty);
+  p.sales = (p.sales || 0) + sellQty;
+  renderStats(); renderTable(); renderCards(); closeSell();
   showToast(`Venta registrada: ${sellQty} × "${p.name}" ✓`);
+  await upsertProduct(p);
 }
-function closeSell(){document.getElementById('sellOverlay').classList.remove('open');document.body.style.overflow='';sellTargetId=null}
-function handleSellOverlayClick(e){if(e.target===document.getElementById('sellOverlay'))closeSell()}
-// ── MODAL ──
-function handleOverlayClick(e){if(e.target===document.getElementById('modalOverlay'))closeModal()}
-function handleConfirmOverlayClick(e){if(e.target===document.getElementById('confirmOverlay'))closeConfirm()}
-function openModal(id){
-  document.getElementById('modalOverlay').classList.add('open');document.body.style.overflow='hidden';
-  if(id){
-    const p=products.find(x=>x.id===id);if(!p)return;
-    document.getElementById('modalTitle').textContent='Editar producto';
-    document.getElementById('editId').value=p.id;
-    document.getElementById('fName').value=p.name;
-    document.getElementById('fCategory').value=p.category;
-    document.getElementById('fDesc').value=p.desc||'';
-    document.getElementById('fPrice').value=p.price;
-    document.getElementById('fStock').value=p.stock;
-    document.getElementById('fSeason').value=p.season||'all';
-    document.getElementById('fEmoji').value=p.emoji||'';
-    document.getElementById('fSizes').value=p.sizes?p.sizes.join(', '):'';
-    document.getElementById('fActive').checked=p.active;
-    document.getElementById('fOnOffer').checked=p.onOffer||false;
-    currentImgBase64=p.img||null;
-    if(p.img){document.getElementById('imgPreview').src=p.img;document.getElementById('imgPreview').classList.add('visible');document.getElementById('imgUploadText').style.display='none';document.getElementById('imgRemoveBtn').classList.add('visible')}
-    else{document.getElementById('imgPreview').classList.remove('visible');document.getElementById('imgUploadText').style.display='';document.getElementById('imgRemoveBtn').classList.remove('visible')}
-    document.getElementById('fOriginalPrice').value=p.originalPrice||'';
-    document.getElementById('offerFields').classList.toggle('visible',!!p.onOffer);
-  }else{
-    document.getElementById('modalTitle').textContent='Nuevo producto';
-    document.getElementById('editId').value='';
-    document.getElementById('fName').value='';document.getElementById('fCategory').value='';
-    document.getElementById('fDesc').value='';document.getElementById('fPrice').value='';
-    document.getElementById('fStock').value='';document.getElementById('fSeason').value='all';
-    document.getElementById('fEmoji').value='👗';
-    document.getElementById('fSizes').value='XS, S, M, L';
-    document.getElementById('fActive').checked=true;document.getElementById('fOnOffer').checked=false;
-    currentImgBase64=null;
+function closeSell() { document.getElementById('sellOverlay').classList.remove('open'); document.body.style.overflow = ''; sellTargetId = null; }
+function handleSellOverlayClick(e) { if (e.target === document.getElementById('sellOverlay')) closeSell(); }
+
+// ── MODAL PRODUCTO ──
+function handleOverlayClick(e) { if (e.target === document.getElementById('modalOverlay')) closeModal(); }
+function handleConfirmOverlayClick(e) { if (e.target === document.getElementById('confirmOverlay')) closeConfirm(); }
+
+function openModal(id) {
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if (id) {
+    const p = products.find(x => x.id === id);
+    if (!p) return;
+    document.getElementById('modalTitle').textContent = 'Editar producto';
+    document.getElementById('editId').value = p.id;
+    document.getElementById('fName').value = p.name;
+    document.getElementById('fCategory').value = p.category;
+    document.getElementById('fDesc').value = p.desc || '';
+    document.getElementById('fPrice').value = p.price;
+    document.getElementById('fStock').value = p.stock;
+    document.getElementById('fSeason').value = p.season || 'all';
+    document.getElementById('fEmoji').value = p.emoji || '';
+    document.getElementById('fSizes').value = p.sizes ? p.sizes.join(', ') : '';
+    document.getElementById('fActive').checked = p.active;
+    document.getElementById('fOnOffer').checked = p.onOffer || false;
+    currentImgBase64 = p.img || null;
+    if (p.img) {
+      document.getElementById('imgPreview').src = p.img;
+      document.getElementById('imgPreview').classList.add('visible');
+      document.getElementById('imgUploadText').style.display = 'none';
+      document.getElementById('imgRemoveBtn').classList.add('visible');
+    } else {
+      document.getElementById('imgPreview').classList.remove('visible');
+      document.getElementById('imgUploadText').style.display = '';
+      document.getElementById('imgRemoveBtn').classList.remove('visible');
+    }
+    document.getElementById('fOriginalPrice').value = p.originalPrice || '';
+    document.getElementById('offerFields').classList.toggle('visible', !!p.onOffer);
+  } else {
+    document.getElementById('modalTitle').textContent = 'Nuevo producto';
+    document.getElementById('editId').value = '';
+    document.getElementById('fName').value = '';
+    document.getElementById('fCategory').value = '';
+    document.getElementById('fDesc').value = '';
+    document.getElementById('fPrice').value = '';
+    document.getElementById('fStock').value = '';
+    document.getElementById('fSeason').value = 'all';
+    document.getElementById('fEmoji').value = '👗';
+    document.getElementById('fSizes').value = 'XS, S, M, L';
+    document.getElementById('fActive').checked = true;
+    document.getElementById('fOnOffer').checked = false;
+    currentImgBase64 = null;
     document.getElementById('imgPreview').classList.remove('visible');
-    document.getElementById('imgUploadText').style.display='';
+    document.getElementById('imgUploadText').style.display = '';
     document.getElementById('imgRemoveBtn').classList.remove('visible');
-    document.getElementById('fImg').value='';document.getElementById('fOriginalPrice').value='';
+    document.getElementById('fImg').value = '';
+    document.getElementById('fOriginalPrice').value = '';
     document.getElementById('offerFields').classList.remove('visible');
   }
 }
-function closeModal(){document.getElementById('modalOverlay').classList.remove('open');document.body.style.overflow=''}
-function toggleOfferFields(){document.getElementById('offerFields').classList.toggle('visible',document.getElementById('fOnOffer').checked)}
-function saveProduct(){
-  const name=document.getElementById('fName').value.trim();
-  const category=document.getElementById('fCategory').value.trim();
-  const price=parseFloat(document.getElementById('fPrice').value);
-  const stock=parseInt(document.getElementById('fStock').value);
-  if(!name||!category||!price||isNaN(stock)){showToast('Completá nombre, categoría, precio y stock');return}
-  const sizes=document.getElementById('fSizes').value?document.getElementById('fSizes').value.split(',').map(s=>s.trim()).filter(Boolean):['Único'];
-  const onOffer=document.getElementById('fOnOffer').checked;
-  const originalPrice=onOffer?parseFloat(document.getElementById('fOriginalPrice').value)||null:null;
-  const season=document.getElementById('fSeason').value;
-  const editId=document.getElementById('editId').value;
-  if(editId){
-    const idx=products.findIndex(p=>p.id===parseInt(editId));
-    if(idx>-1){products[idx]={...products[idx],name,category,desc:document.getElementById('fDesc').value.trim(),price,stock,season,emoji:document.getElementById('fEmoji').value.trim()||'👗',img:currentImgBase64,sizes,active:document.getElementById('fActive').checked,onOffer,originalPrice};showToast(`"${name}" actualizado ✓`)}
-  }else{
-    products.push({id:nextId(),name,category,desc:document.getElementById('fDesc').value.trim(),price,stock,season,emoji:document.getElementById('fEmoji').value.trim()||'👗',sizes,active:document.getElementById('fActive').checked,onOffer,originalPrice,img:currentImgBase64,createdAt:new Date().toISOString()});
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+function toggleOfferFields() { document.getElementById('offerFields').classList.toggle('visible', document.getElementById('fOnOffer').checked); }
+
+async function saveProduct() {
+  const name = document.getElementById('fName').value.trim();
+  const category = document.getElementById('fCategory').value.trim();
+  const price = parseFloat(document.getElementById('fPrice').value);
+  const stock = parseInt(document.getElementById('fStock').value);
+  if (!name || !category || !price || isNaN(stock)) { showToast('Completá nombre, categoría, precio y stock'); return; }
+  const sizes = document.getElementById('fSizes').value
+    ? document.getElementById('fSizes').value.split(',').map(s => s.trim()).filter(Boolean)
+    : ['Único'];
+  const onOffer = document.getElementById('fOnOffer').checked;
+  const originalPrice = onOffer ? parseFloat(document.getElementById('fOriginalPrice').value) || null : null;
+  const season = document.getElementById('fSeason').value;
+  const editId = document.getElementById('editId').value;
+
+  if (editId) {
+    const idx = products.findIndex(p => p.id === editId);
+    if (idx > -1) {
+      products[idx] = {
+        ...products[idx], name, category,
+        desc: document.getElementById('fDesc').value.trim(),
+        price, stock, season,
+        emoji: document.getElementById('fEmoji').value.trim() || '👗',
+        img: currentImgBase64,
+        sizes, active: document.getElementById('fActive').checked,
+        onOffer, originalPrice
+      };
+      await upsertProduct(products[idx]);
+      showToast(`"${name}" actualizado ✓`);
+    }
+  } else {
+    const newProduct = {
+      id: nextId(), name, category,
+      desc: document.getElementById('fDesc').value.trim(),
+      price, stock, season,
+      emoji: document.getElementById('fEmoji').value.trim() || '👗',
+      sizes, active: document.getElementById('fActive').checked,
+      onOffer, originalPrice,
+      img: currentImgBase64,
+      sales: 0,
+      createdAt: new Date().toISOString()
+    };
+    products.push(newProduct);
+    await upsertProduct(newProduct);
     showToast(`"${name}" agregado ✓`);
   }
-  saveProducts();renderStats();renderTable();renderCards();updateCatList();closeModal();
+  renderStats(); renderTable(); renderCards(); updateCatList(); closeModal();
 }
-function confirmDelete(id,name){
-  document.getElementById('confirmText').textContent=`¿Seguro que querés eliminar "${name}"? Esta acción no se puede deshacer.`;
-  document.getElementById('confirmBtn').onclick=()=>deleteProduct(id);
+
+// ── DELETE ──
+function confirmDelete(id, name) {
+  document.getElementById('confirmText').textContent = `¿Seguro que querés eliminar "${name}"? Esta acción no se puede deshacer.`;
+  document.getElementById('confirmBtn').onclick = () => deleteProduct(id);
   document.getElementById('confirmOverlay').classList.add('open');
 }
-function closeConfirm(){document.getElementById('confirmOverlay').classList.remove('open')}
-function deleteProduct(id){
-  const p=products.find(x=>x.id===id);
-  products=products.filter(x=>x.id!==id);
-  saveProducts();renderStats();renderTable();renderCards();closeConfirm();
+function closeConfirm() { document.getElementById('confirmOverlay').classList.remove('open'); }
+async function deleteProduct(id) {
+  const p = products.find(x => x.id === id);
+  products = products.filter(x => x.id !== id);
+  renderStats(); renderTable(); renderCards(); closeConfirm();
   showToast(`"${p?.name}" eliminado`);
+  await deleteProductDb(id);
 }
-function showToast(msg){
-  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2500);
+
+// ── IMAGE ──
+function handleImageUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const MAX = 800; let w = img.width, h = img.height;
+      if (w > h) { if (w > MAX) { h = h * MAX / w; w = MAX; } }
+      else { if (h > MAX) { w = w * MAX / h; h = MAX; } }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      currentImgBase64 = canvas.toDataURL('image/jpeg', 0.8);
+      document.getElementById('imgPreview').src = currentImgBase64;
+      document.getElementById('imgPreview').classList.add('visible');
+      document.getElementById('imgUploadText').style.display = 'none';
+      document.getElementById('imgRemoveBtn').classList.add('visible');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
 }
+function removeImage(e) {
+  e.stopPropagation(); currentImgBase64 = null;
+  document.getElementById('imgPreview').src = '';
+  document.getElementById('imgPreview').classList.remove('visible');
+  document.getElementById('imgUploadText').style.display = '';
+  document.getElementById('imgRemoveBtn').classList.remove('visible');
+  document.getElementById('fImg').value = '';
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
 document.getElementById('passInput').focus();
 </script>
 </body>
 </html>
-
