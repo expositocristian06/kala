@@ -533,7 +533,7 @@ async function loadProducts() {
     img: row.img || null,
     emoji: row.img ? null : '👗',
     sizes: row.sizes || ['Único'],
-    desc: row.desc || ''
+    desc: row["desc"] || ''
   }));
   renderOfertas();
   renderFilters();
