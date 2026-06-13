@@ -343,7 +343,7 @@ function dbToProduct(row) {
     img: row.img || null,
     emoji: row.img ? null : '👗',
     sizes: row.sizes ? row.sizes : ['Único'],
-    desc: row.desc || '',
+    desc: row["desc"] || '',
     sales: row.sales || 0,
     createdAt: row.created_at
   };
@@ -361,7 +361,7 @@ function productToDb(p) {
     img: p.img || null,
     sales: p.sales || 0,
     sizes: p.sizes || ['Único'],
-    desc: p.desc || ''
+    'desc': p.desc || ''
   };
 }
 
