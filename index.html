@@ -487,36 +487,57 @@ footer{background:var(--text);color:var(--cream);padding:3rem 2rem;text-align:ce
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ─── DEFAULT PRODUCTS ───
-const DEFAULT_PRODUCTS = [
-  {id:1,name:"Camisa lino oversize",category:"Remeras",price:18500,desc:"Camisa de lino premium con corte oversize. Perfecta para el día a día. Disponible en blanco y natural.",sizes:["XS","S","M","L","XL"],active:true,emoji:"👕",onOffer:false,originalPrice:null},
-  {id:2,name:"Pantalón palazzo",category:"Pantalones",price:24000,desc:"Pantalón de tiro alto con caída amplia. Tela liviana y fresca ideal para verano.",sizes:["S","M","L"],active:true,emoji:"👖",onOffer:false,originalPrice:null},
-  {id:3,name:"Vestido midi floral",category:"Vestidos",price:24900,desc:"Vestido midi con estampado floral exclusivo. Escote en V y manga corta con volado.",sizes:["XS","S","M","L"],active:true,emoji:"👗",onOffer:true,originalPrice:32000},
-  {id:4,name:"Blazer cropped",category:"Abrigos",price:42000,desc:"Blazer cropped de fibrana. Ideal para looks de oficina o salidas nocturnas.",sizes:["S","M","L","XL"],active:true,emoji:"🧥",onOffer:false,originalPrice:null},
-  {id:5,name:"Falda midi plisada",category:"Faldas",price:21000,desc:"Falda midi plisada con cintura elástica. Cae perfecto y es súper cómoda.",sizes:["XS","S","M","L"],active:true,emoji:"👗",onOffer:false,originalPrice:null},
-  {id:6,name:"Top bandeau",category:"Remeras",price:8500,desc:"Top bandeau con breteles finos. Combinalo con cualquier pantalón o falda.",sizes:["XS","S","M"],active:true,emoji:"👙",onOffer:true,originalPrice:12000},
-  {id:7,name:"Cartera de cuero",category:"Accesorios",price:28000,desc:"Cartera de cuero ecológico con cierre metálico dorado. Ideal para el día a día.",sizes:["Único"],active:true,emoji:"👜",onOffer:false,originalPrice:null},
-  {id:8,name:"Conjunto lino",category:"Conjuntos",price:38500,desc:"Conjunto de camisa y pantalón en lino natural. Cómodo, fresco y muy elegante.",sizes:["S","M","L"],active:true,emoji:"🌿",onOffer:true,originalPrice:48000}
-];
+const SUPABASE_URL = 'https://xaahdvcjgcxuiftobrtw.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhhYWhkdmNqZ2N4dWlmdG9icnR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNzgxMjAsImV4cCI6MjA5Njg1NDEyMH0.pac1QJOIFl3P_WrjR9Qq1IIhk_aSK67oJ3qbMhaYW-Y';
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ─── STATE ───
 let products = [];
 let cart = [];
 let activeFilter = 'Todos';
 let selectedProduct = null;
 let selectedSize = null;
 
-// ─── INIT ───
-function init() {
-  const saved = localStorage.getItem('kala_products');
-  products = saved ? JSON.parse(saved) : DEFAULT_PRODUCTS;
+// ─── INIT CON SUPABASE + TIEMPO REAL ───
+async function init() {
+  await loadProducts();
   const savedCart = localStorage.getItem('kala_cart');
   cart = savedCart ? JSON.parse(savedCart) : [];
+  updateCartUI();
+
+  // Suscripción en tiempo real: cuando el admin cambia algo, la web se actualiza sola
+  db.channel('products-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
+      loadProducts();
+    })
+    .subscribe();
+}
+
+async function loadProducts() {
+  const { data, error } = await db
+    .from('products')
+    .select('*')
+    .order('created_at', { ascending: true });
+  if (error) { console.error('Error cargando productos:', error); return; }
+  products = (data || []).map(row => ({
+    id: row.id,
+    name: row.name,
+    category: row.category,
+    price: Number(row.price),
+    originalPrice: row.original_price ? Number(row.original_price) : null,
+    onOffer: !!row.original_price,
+    stock: row.stock || 0,
+    season: row.season || 'all',
+    active: row.active !== false,
+    img: row.img || null,
+    emoji: row.img ? null : '👗',
+    sizes: row.sizes || ['Único'],
+    desc: row.desc || ''
+  }));
   renderOfertas();
   renderFilters();
   renderProducts();
-  updateCartUI();
 }
 
 // ─── OFERTAS ───
@@ -525,14 +546,14 @@ function calcDiscount(original, current) {
 }
 function renderOfertas() {
   const el = document.getElementById('ofertasGrid');
-  const ofertas = products.filter(p => p.active && p.onOffer && p.originalPrice);
+  const ofertas = products.filter(p => p.active && p.onOffer && p.originalPrice && p.stock > 0);
   if (!ofertas.length) {
     document.getElementById('ofertas').style.display = 'none';
     return;
   }
   document.getElementById('ofertas').style.display = '';
   el.innerHTML = ofertas.map(p => `
-    <div class="oferta-card" onclick="openModal(${p.id})">
+    <div class="oferta-card" onclick="openModal('${p.id}')">
       <div class="oferta-badge">-${calcDiscount(p.originalPrice, p.price)}%</div>
       <div class="oferta-img">${p.img ? `<img src="${p.img}" alt="${p.name}">` : p.emoji || '👗'}</div>
       <div class="oferta-info">
@@ -549,13 +570,12 @@ function renderOfertas() {
 
 // ─── FILTERS ───
 function getCategories() {
-  const cats = ['Todos', ...new Set(products.filter(p=>p.active).map(p=>p.category))];
-  return cats;
+  return ['Todos', ...new Set(products.filter(p => p.active).map(p => p.category))];
 }
 function renderFilters() {
   const el = document.getElementById('filters');
-  el.innerHTML = getCategories().map(c=>`
-    <button class="filter-btn ${c===activeFilter?'active':''}" onclick="setFilter('${c}')">${c}</button>
+  el.innerHTML = getCategories().map(c => `
+    <button class="filter-btn ${c === activeFilter ? 'active' : ''}" onclick="setFilter('${c}')">${c}</button>
   `).join('');
 }
 function setFilter(cat) {
@@ -565,26 +585,24 @@ function setFilter(cat) {
 }
 
 // ─── PRODUCTS ───
-function formatPrice(p) {
-  return '$' + p.toLocaleString('es-AR');
-}
+function formatPrice(p) { return '$' + p.toLocaleString('es-AR'); }
 function renderProducts() {
-  const filtered = products.filter(p => p.active && (activeFilter==='Todos' || p.category===activeFilter));
+  const filtered = products.filter(p => p.active && p.stock > 0 && (activeFilter === 'Todos' || p.category === activeFilter));
   const el = document.getElementById('productsGrid');
-  if(!filtered.length) {
+  if (!filtered.length) {
     el.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;letter-spacing:1px">No hay productos disponibles en esta categoría.</p>';
     return;
   }
-  el.innerHTML = filtered.map(p=>`
-    <div class="product-card" onclick="openModal(${p.id})">
-      <div class="product-img">${p.img ? `<img src="${p.img}" alt="${p.name}">` : p.emoji||'👗'}</div>
+  el.innerHTML = filtered.map(p => `
+    <div class="product-card" onclick="openModal('${p.id}')">
+      <div class="product-img">${p.img ? `<img src="${p.img}" alt="${p.name}">` : p.emoji || '👗'}</div>
       <div class="product-info">
         <div class="product-category">${p.category}</div>
         <div class="product-name">${p.name}</div>
         <div class="product-desc">${p.desc}</div>
         <div class="product-footer">
           <div class="product-price">${formatPrice(p.price)}</div>
-          <button class="add-btn" onclick="event.stopPropagation();quickAdd(${p.id})">+ Agregar</button>
+          <button class="add-btn" onclick="event.stopPropagation();quickAdd('${p.id}')">+ Agregar</button>
         </div>
       </div>
     </div>
@@ -593,77 +611,72 @@ function renderProducts() {
 
 // ─── MODAL ───
 function openModal(id) {
-  const p = products.find(x=>x.id===id);
-  if(!p) return;
+  const p = products.find(x => x.id === id);
+  if (!p) return;
   selectedProduct = p;
   selectedSize = p.sizes[0];
-  document.getElementById('modalImg').innerHTML = p.img ? `<img src="${p.img}" alt="${p.name}">` : (p.emoji||'👗');
+  document.getElementById('modalImg').innerHTML = p.img ? `<img src="${p.img}" alt="${p.name}">` : (p.emoji || '👗');
   document.getElementById('modalCategory').textContent = p.category;
   document.getElementById('modalName').textContent = p.name;
-  document.getElementById('modalPrice').textContent = formatPrice(p.price);
+  document.getElementById('modalPrice').innerHTML = p.onOffer && p.originalPrice
+    ? `<span style="text-decoration:line-through;color:var(--text-muted);font-size:0.9rem;margin-right:0.5rem">${formatPrice(p.originalPrice)}</span><span style="color:var(--coral)">${formatPrice(p.price)}</span>`
+    : formatPrice(p.price);
   document.getElementById('modalDesc').textContent = p.desc;
-  document.getElementById('modalSizes').innerHTML = p.sizes.map(s=>`
-    <button class="size-opt ${s===selectedSize?'active':''}" onclick="selectSize('${s}')">${s}</button>
+  document.getElementById('modalSizes').innerHTML = p.sizes.map(s => `
+    <button class="size-opt ${s === selectedSize ? 'active' : ''}" onclick="selectSize('${s}')">${s}</button>
   `).join('');
   document.getElementById('modalOverlay').classList.add('open');
-  document.body.style.overflow='hidden';
+  document.body.style.overflow = 'hidden';
 }
 function selectSize(s) {
   selectedSize = s;
-  document.querySelectorAll('.size-opt').forEach(b=>b.classList.toggle('active',b.textContent===s));
+  document.querySelectorAll('.size-opt').forEach(b => b.classList.toggle('active', b.textContent === s));
 }
-function closeModal(e) {
-  if(e.target.id==='modalOverlay') closeModalBtn();
-}
+function closeModal(e) { if (e.target.id === 'modalOverlay') closeModalBtn(); }
 function closeModalBtn() {
   document.getElementById('modalOverlay').classList.remove('open');
-  document.body.style.overflow='';
-  selectedProduct=null;
+  document.body.style.overflow = '';
+  selectedProduct = null;
 }
 function addFromModal() {
-  if(!selectedProduct) return;
+  if (!selectedProduct) return;
   addToCart(selectedProduct, selectedSize);
   closeModalBtn();
 }
 function quickAdd(id) {
-  const p = products.find(x=>x.id===id);
-  if(!p) return;
-  if(p.sizes.length > 1) { openModal(id); return; }
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  if (p.sizes.length > 1) { openModal(id); return; }
   addToCart(p, p.sizes[0]);
 }
 
 // ─── CART ───
 function addToCart(product, size) {
   const key = `${product.id}_${size}`;
-  const existing = cart.find(i=>i.key===key);
-  if(existing) { existing.qty++; }
-  else { cart.push({key,id:product.id,name:product.name,price:product.price,size,qty:1,emoji:product.emoji||'👗',img:product.img||null}); }
+  const existing = cart.find(i => i.key === key);
+  if (existing) { existing.qty++; }
+  else { cart.push({ key, id: product.id, name: product.name, price: product.price, size, qty: 1, emoji: product.emoji || '👗', img: product.img || null }); }
   saveCart();
   updateCartUI();
   showToast(`"${product.name}" agregado al carrito`);
 }
 function removeFromCart(key) {
-  cart = cart.filter(i=>i.key!==key);
-  saveCart();
-  updateCartUI();
-  renderCartItems();
+  cart = cart.filter(i => i.key !== key);
+  saveCart(); updateCartUI(); renderCartItems();
 }
-function changeQty(key, delta) {
-  const item = cart.find(i=>i.key===key);
-  if(!item) return;
+function changeCartQty(key, delta) {
+  const item = cart.find(i => i.key === key);
+  if (!item) return;
   item.qty += delta;
-  if(item.qty <= 0) { removeFromCart(key); return; }
-  saveCart();
-  updateCartUI();
-  renderCartItems();
+  if (item.qty <= 0) { removeFromCart(key); return; }
+  saveCart(); updateCartUI(); renderCartItems();
 }
-function saveCart() { localStorage.setItem('kala_cart',JSON.stringify(cart)); }
-function getTotal() { return cart.reduce((s,i)=>s+i.price*i.qty,0); }
+function saveCart() { localStorage.setItem('kala_cart', JSON.stringify(cart)); }
+function getTotal() { return cart.reduce((s, i) => s + i.price * i.qty, 0); }
 function updateCartUI() {
-  const count = cart.reduce((s,i)=>s+i.qty,0);
+  const count = cart.reduce((s, i) => s + i.qty, 0);
   document.getElementById('cartCount').textContent = count;
   document.getElementById('cartCount').style.display = count ? 'flex' : 'none';
-  // Botón flotante mobile
   const floatCart = document.getElementById('floatCart');
   document.getElementById('floatCartCount').textContent = count;
   floatCart.classList.toggle('visible', count > 0);
@@ -675,14 +688,95 @@ function toggleCart() {
   const overlay = document.getElementById('cartOverlay');
   const open = sidebar.classList.toggle('open');
   overlay.classList.toggle('open', open);
-  if(open) { renderCartItems(); document.body.style.overflow='hidden'; }
-  else { document.body.style.overflow=''; }
+  if (open) { renderCartItems(); document.body.style.overflow = 'hidden'; }
+  else { document.body.style.overflow = ''; }
 }
 function renderCartItems() {
   const el = document.getElementById('cartItems');
   const footer = document.getElementById('cartFooter');
-  if(!cart.length) {
-    el.innerHTML = '<div class="cart-empty"><span>🛍️</span
+  if (!cart.length) {
+    el.innerHTML = '<div class="cart-empty"><span>🛍️</span><p>Tu carrito está vacío</p></div>';
+    footer.style.display = 'none';
+    return;
+  }
+  footer.style.display = '';
+  el.innerHTML = cart.map(item => `
+    <div class="cart-item">
+      <div class="cart-item-img">${item.img ? `<img src="${item.img}" alt="${item.name}">` : item.emoji}</div>
+      <div class="cart-item-info">
+        <div class="cart-item-name">${item.name}</div>
+        <div class="cart-item-variant">Talle: ${item.size}</div>
+        <div class="cart-item-footer">
+          <span class="cart-item-price">${formatPrice(item.price * item.qty)}</span>
+          <div class="qty-control">
+            <button class="qty-btn" onclick="changeCartQty('${item.key}',-1)">−</button>
+            <span class="qty-num">${item.qty}</span>
+            <button class="qty-btn" onclick="changeCartQty('${item.key}',1)">+</button>
+          </div>
+        </div>
+        <button class="remove-item" onclick="removeFromCart('${item.key}')">Eliminar</button>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('cartTotal').textContent = formatPrice(getTotal());
+}
 
+// ─── WHATSAPP ───
+function sendWhatsApp() {
+  const lines = cart.map(i => `• ${i.name} (Talle ${i.size}) x${i.qty} = ${formatPrice(i.price * i.qty)}`).join('%0A');
+  const total = formatPrice(getTotal());
+  const msg = `Hola Kala! 👋 Quiero hacer un pedido:%0A%0A${lines}%0A%0A*Total: ${total}*%0A%0A¿Cómo coordino el pago y envío?`;
+  window.open(`https://wa.me/5492235396641?text=${msg}`, '_blank');
+  showConfirmation();
+}
+function showConfirmation() {
+  document.getElementById('confirmationScreen').classList.add('open');
+  cart = []; saveCart(); updateCartUI();
+  const sidebar = document.getElementById('cartSidebar');
+  const overlay = document.getElementById('cartOverlay');
+  sidebar.classList.remove('open');
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+function closeConfirmation() {
+  document.getElementById('confirmationScreen').classList.remove('open');
+}
 
-  
+// ─── CARD PAYMENT ───
+function openCardModal() { document.getElementById('cardModal').classList.add('open'); }
+function closeCardModal() { document.getElementById('cardModal').classList.remove('open'); }
+function sendCardPayment() {
+  const name = document.getElementById('cardName').value.trim();
+  const phone = document.getElementById('cardPhone').value.trim();
+  if (!name || !phone) { showToast('Completá tu nombre y WhatsApp'); return; }
+  const lines = cart.map(i => `• ${i.name} (Talle ${i.size}) x${i.qty}`).join('%0A');
+  const total = formatPrice(getTotal());
+  const msg = `Hola Kala! Soy ${name} (${phone}). Quiero pagar con tarjeta:%0A%0A${lines}%0A%0ATotal: ${total}%0A%0A¿Me mandás el link de Mercado Pago?`;
+  window.open(`https://wa.me/5492235396641?text=${msg}`, '_blank');
+  closeCardModal();
+  showConfirmation();
+}
+
+// ─── HAMBURGER ───
+function toggleMenu() {
+  const h = document.getElementById('hamburger');
+  const m = document.getElementById('mobileMenu');
+  h.classList.toggle('open');
+  m.classList.toggle('open');
+}
+function closeMenu() {
+  document.getElementById('hamburger').classList.remove('open');
+  document.getElementById('mobileMenu').classList.remove('open');
+}
+
+// ─── TOAST ───
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+window.addEventListener('load', init);
+</script>
+</body>
+</html>
