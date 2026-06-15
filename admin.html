@@ -105,16 +105,35 @@ tr:hover td{background:var(--cream)}
 .form-check label{font-size:0.82rem;color:var(--text);cursor:pointer}
 .offer-fields{background:var(--cream-dark);border-radius:4px;padding:1rem;margin-bottom:1rem;display:none}
 .offer-fields.visible{display:block}
-.img-upload-area{border:2px dashed var(--border);border-radius:6px;padding:1.5rem;text-align:center;background:var(--cream);position:relative;overflow:hidden}
-.img-upload-area:hover{border-color:var(--coral)}
-.img-upload-input-wrap{position:relative;display:inline-block;cursor:pointer}
-.img-upload-input-wrap input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;touch-action:manipulation;font-size:16px}
-.img-upload-preview{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:4px;display:none;margin-bottom:0.8rem}
-.img-upload-preview.visible{display:block}
-.img-upload-text{font-size:0.78rem;color:var(--text-muted);letter-spacing:1px;pointer-events:none}
-.img-upload-text span{display:block;font-size:1.5rem;margin-bottom:0.4rem}
-.img-remove-btn{background:none;border:1px solid var(--border);padding:0.4rem 0.8rem;border-radius:4px;font-size:0.7rem;cursor:pointer;color:var(--red);font-family:'Inter',sans-serif;margin-top:0.5rem;display:none;min-height:36px}
-.img-remove-btn.visible{display:inline-block}
+
+/* ── MULTI-FOTO ── */
+.multi-img-area{border:1px solid var(--border);border-radius:6px;overflow:hidden;background:var(--cream)}
+.multi-img-grid{display:flex;gap:8px;padding:10px;flex-wrap:wrap;min-height:80px}
+.multi-img-thumb{position:relative;width:70px;height:84px;border-radius:4px;overflow:hidden;border:2px solid var(--border);flex-shrink:0}
+.multi-img-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.multi-img-thumb .thumb-remove{position:absolute;top:2px;right:2px;background:rgba(239,68,68,0.9);color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.65rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+.multi-img-thumb.main-thumb{border-color:var(--coral)}
+.multi-img-thumb .main-label{position:absolute;bottom:0;left:0;right:0;background:rgba(232,107,58,0.85);color:white;font-size:0.55rem;text-align:center;padding:2px;letter-spacing:1px;text-transform:uppercase}
+.multi-img-add{width:70px;height:84px;border:2px dashed var(--border);border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--text-muted);font-size:1.3rem;transition:border-color .2s;position:relative;flex-shrink:0}
+.multi-img-add:hover{border-color:var(--coral);color:var(--coral)}
+.multi-img-add input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;font-size:16px}
+.multi-img-add span{font-size:0.55rem;letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+.multi-img-hint{padding:6px 10px 10px;font-size:0.68rem;color:var(--text-muted);letter-spacing:1px}
+
+/* ── COLORES ── */
+.colors-section{margin-bottom:1rem}
+.colors-list{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;min-height:36px;align-items:center}
+.color-chip{display:flex;align-items:center;gap:5px;background:var(--cream-dark);border:1px solid var(--border);border-radius:20px;padding:4px 10px 4px 6px;font-size:0.72rem;color:var(--text)}
+.color-chip-dot{width:16px;height:16px;border-radius:50%;border:1px solid rgba(0,0,0,0.1);flex-shrink:0}
+.color-chip-remove{background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:0.8rem;padding:0 0 0 4px;line-height:1}
+.color-chip-remove:hover{color:var(--red)}
+.add-color-row{display:flex;gap:8px;align-items:center}
+.add-color-row input[type=text]{flex:1;padding:0.55rem 0.8rem;border:1px solid var(--border);border-radius:4px;font-size:0.82rem;font-family:'Inter',sans-serif;color:var(--text);background:var(--cream);outline:none}
+.add-color-row input[type=text]:focus{border-color:var(--coral)}
+.add-color-row input[type=color]{width:44px;height:38px;border:1px solid var(--border);border-radius:4px;cursor:pointer;padding:2px;background:var(--cream)}
+.btn-add-color{background:var(--coral);color:white;border:none;border-radius:4px;padding:0.55rem 0.9rem;font-size:0.72rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap}
+.btn-add-color:hover{background:#C8512A}
+
 .modal-footer{padding:0 1.5rem 2rem;display:flex;gap:0.8rem;justify-content:flex-end}
 .btn-cancel{background:none;border:1px solid var(--border);padding:0.7rem 1.4rem;border-radius:4px;font-size:0.78rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;color:var(--text-muted);font-family:'Inter',sans-serif;min-height:44px}
 .btn-cancel:hover{border-color:var(--coral);color:var(--coral)}
@@ -202,17 +221,22 @@ tr:hover td{background:var(--cream)}
         <div class="form-group"><label>Categoría *</label><input type="text" id="fCategory" placeholder="Ej: Vestidos" list="catList" autocomplete="off"><datalist id="catList"></datalist></div>
       </div>
       <div class="form-group"><label>Descripción</label><textarea id="fDesc" placeholder="Describe el producto..."></textarea></div>
+
+      <!-- MULTI-FOTO -->
       <div class="form-group">
-        <label>Foto del producto</label>
-        <div class="img-upload-area">
-          <img class="img-upload-preview" id="imgPreview" src="" alt="preview">
-          <div class="img-upload-input-wrap" id="imgUploadText">
-            <input type="file" id="fImg" accept="image/*" onchange="handleImageUpload(event)">
-            <div class="img-upload-text"><span>📷</span>Tocá para subir una foto</div>
+        <label>Fotos del producto</label>
+        <div class="multi-img-area">
+          <div class="multi-img-grid" id="imgGrid">
+            <div class="multi-img-add" id="imgAddBtn">
+              <input type="file" id="fImg" accept="image/*" multiple onchange="handleImagesUpload(event)">
+              <span style="font-size:1.5rem">📷</span>
+              <span>Agregar</span>
+            </div>
           </div>
-          <button type="button" class="img-remove-btn" id="imgRemoveBtn" onclick="removeImage(event)">✕ Quitar foto</button>
+          <div class="multi-img-hint">La primera foto es la principal. Podés agregar hasta 6 fotos.</div>
         </div>
       </div>
+
       <div class="form-row">
         <div class="form-group"><label>Precio ($) *</label><input type="number" id="fPrice" placeholder="Ej: 24900" min="0" inputmode="numeric"></div>
         <div class="form-group"><label>Stock (unidades) *</label><input type="number" id="fStock" placeholder="Ej: 12" min="0" inputmode="numeric"></div>
@@ -227,9 +251,20 @@ tr:hover td{background:var(--cream)}
             <option value="primavera">Primavera</option>
           </select>
         </div>
-        <div class="form-group"><label>Emoji (si no hay foto)</label><input type="text" id="fEmoji" placeholder="👗"></div>
+        <div class="form-group"><label>Talles (separados por coma)</label><input type="text" id="fSizes" placeholder="Ej: XS, S, M, L, XL" autocomplete="off"></div>
       </div>
-      <div class="form-group"><label>Talles (separados por coma)</label><input type="text" id="fSizes" placeholder="Ej: XS, S, M, L, XL" autocomplete="off"></div>
+
+      <!-- COLORES -->
+      <div class="form-group colors-section">
+        <label>Colores disponibles</label>
+        <div class="colors-list" id="colorsList"></div>
+        <div class="add-color-row">
+          <input type="color" id="colorPicker" value="#E86B3A">
+          <input type="text" id="colorName" placeholder="Nombre del color (ej: Rojo)" maxlength="30">
+          <button type="button" class="btn-add-color" onclick="addColor()">+ Agregar</button>
+        </div>
+      </div>
+
       <div class="form-check"><input type="checkbox" id="fActive" checked><label for="fActive">Producto activo (visible en la tienda)</label></div>
       <div class="form-check"><input type="checkbox" id="fOnOffer" onchange="toggleOfferFields()"><label for="fOnOffer">🔥 Está en oferta</label></div>
       <div class="offer-fields" id="offerFields">
@@ -278,7 +313,10 @@ const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const PASSWORD = 'kala2026';
 let products = [];
-let currentImgBase64 = null;
+// fotos del formulario: array de base64 strings
+let currentImgs = [];
+// colores del formulario: array de {name, hex}
+let currentColors = [];
 let sellTargetId = null;
 let sellQty = 1;
 
@@ -330,6 +368,20 @@ async function deleteProductDb(id) {
 
 // ── MAPEO DB <-> JS ──
 function dbToProduct(row) {
+  // img puede ser string simple o JSON array
+  let imgs = [];
+  if (row.img) {
+    try {
+      const parsed = JSON.parse(row.img);
+      imgs = Array.isArray(parsed) ? parsed : [row.img];
+    } catch { imgs = [row.img]; }
+  }
+  // colors: jsonb array de {name, hex}
+  let colors = [];
+  if (row.colors) {
+    try { colors = typeof row.colors === 'string' ? JSON.parse(row.colors) : (row.colors || []); }
+    catch { colors = []; }
+  }
   return {
     id: row.id,
     name: row.name,
@@ -340,15 +392,22 @@ function dbToProduct(row) {
     stock: row.stock || 0,
     season: row.season || 'all',
     active: row.active !== false,
-    img: row.img || null,
-    emoji: row.img ? null : '👗',
+    imgs,
+    img: imgs[0] || null,
+    emoji: imgs.length ? null : '👗',
     sizes: row.sizes ? row.sizes : ['Único'],
+    colors,
     desc: row["desc"] || '',
     sales: row.sales || 0,
     createdAt: row.created_at
   };
 }
+
 function productToDb(p) {
+  // Guardar imgs como JSON array si hay más de 1, o string simple si hay 1
+  const imgVal = p.imgs && p.imgs.length > 1
+    ? JSON.stringify(p.imgs)
+    : (p.imgs && p.imgs.length === 1 ? p.imgs[0] : null);
   return {
     id: p.id,
     name: p.name,
@@ -358,9 +417,10 @@ function productToDb(p) {
     stock: p.stock,
     season: p.season || 'all',
     active: p.active,
-    img: p.img || null,
+    img: imgVal,
     sales: p.sales || 0,
     sizes: p.sizes || ['Único'],
+    colors: p.colors && p.colors.length ? p.colors : null,
     'desc': p.desc || ''
   };
 }
@@ -401,7 +461,10 @@ function renderTable() {
   tbody.innerHTML = products.map(p => `
     <tr>
       <td><div class="prod-emoji">${p.img ? `<img src="${p.img}" alt="${p.name}">` : (p.emoji || '👗')}</div></td>
-      <td><div class="prod-name">${p.name}</div><div class="prod-sizes">${p.sizes ? p.sizes.join(', ') : ''}</div></td>
+      <td>
+        <div class="prod-name">${p.name}</div>
+        <div class="prod-sizes">${p.sizes ? p.sizes.join(', ') : ''}${p.colors && p.colors.length ? ' · ' + p.colors.length + ' color' + (p.colors.length > 1 ? 'es' : '') : ''}${p.imgs && p.imgs.length > 1 ? ' · ' + p.imgs.length + ' fotos' : ''}</div>
+      </td>
       <td><span class="badge" style="background:var(--cream-dark);color:var(--text-muted)">${p.category}</span></td>
       <td class="price-cell">${p.onOffer && p.originalPrice ? `<span class="original-price">${formatPrice(p.originalPrice)}</span><span class="offer-price">${formatPrice(p.price)}</span>` : formatPrice(p.price)}</td>
       <td><span class="stock-pill ${stockClass(p.stock)}">${p.stock} u.</span></td>
@@ -424,7 +487,7 @@ function renderCards() {
       <div class="card-img">${p.img ? `<img src="${p.img}" alt="${p.name}">` : (p.emoji || '👗')}</div>
       <div class="card-body">
         <div class="card-name">${p.name}</div>
-        <div class="card-meta">${p.category} · ${p.sizes ? p.sizes.join(', ') : ''} · <span class="stock-pill ${stockClass(p.stock)}">${p.stock} u.</span></div>
+        <div class="card-meta">${p.category} · ${p.sizes ? p.sizes.join(', ') : ''}${p.imgs && p.imgs.length > 1 ? ' · 📷' + p.imgs.length : ''}${p.colors && p.colors.length ? ' · 🎨' + p.colors.length : ''} · <span class="stock-pill ${stockClass(p.stock)}">${p.stock} u.</span></div>
         <div class="card-price">${p.onOffer && p.originalPrice ? `<span class="original-price">${formatPrice(p.originalPrice)}</span><span class="offer-price">${formatPrice(p.price)}</span>` : formatPrice(p.price)}${p.onOffer ? '<span class="badge badge-offer" style="margin-left:0.4rem">🔥 Oferta</span>' : ''}</div>
         <div class="card-footer">
           <label class="toggle"><input type="checkbox" ${p.active ? 'checked' : ''} onchange="toggleActive('${p.id}')"><span class="toggle-slider"></span></label>
@@ -483,13 +546,98 @@ async function confirmSell() {
 function closeSell() { document.getElementById('sellOverlay').classList.remove('open'); document.body.style.overflow = ''; sellTargetId = null; }
 function handleSellOverlayClick(e) { if (e.target === document.getElementById('sellOverlay')) closeSell(); }
 
+// ── MULTI-FOTO ──
+function handleImagesUpload(event) {
+  const files = Array.from(event.target.files);
+  const remaining = 6 - currentImgs.length;
+  const toProcess = files.slice(0, remaining);
+  let processed = 0;
+  toProcess.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const MAX = 900; let w = img.width, h = img.height;
+        if (w > h) { if (w > MAX) { h = h * MAX / w; w = MAX; } }
+        else { if (h > MAX) { w = w * MAX / h; h = MAX; } }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        currentImgs.push(canvas.toDataURL('image/jpeg', 0.82));
+        processed++;
+        if (processed === toProcess.length) renderImgGrid();
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+  event.target.value = '';
+}
+
+function removeImg(idx) {
+  currentImgs.splice(idx, 1);
+  renderImgGrid();
+}
+
+function renderImgGrid() {
+  const grid = document.getElementById('imgGrid');
+  const thumbs = currentImgs.map((src, i) => `
+    <div class="multi-img-thumb ${i === 0 ? 'main-thumb' : ''}">
+      <img src="${src}" alt="foto ${i+1}">
+      <button class="thumb-remove" onclick="removeImg(${i})">✕</button>
+      ${i === 0 ? '<div class="main-label">Principal</div>' : ''}
+    </div>
+  `).join('');
+  const addBtn = currentImgs.length < 6 ? `
+    <div class="multi-img-add">
+      <input type="file" id="fImg" accept="image/*" multiple onchange="handleImagesUpload(event)">
+      <span style="font-size:1.5rem">📷</span>
+      <span>Agregar</span>
+    </div>` : '';
+  grid.innerHTML = thumbs + addBtn;
+}
+
+// ── COLORES ──
+function addColor() {
+  const hex = document.getElementById('colorPicker').value;
+  const name = document.getElementById('colorName').value.trim();
+  if (!name) { showToast('Escribí el nombre del color'); return; }
+  if (currentColors.find(c => c.name.toLowerCase() === name.toLowerCase())) { showToast('Ese color ya está agregado'); return; }
+  currentColors.push({ name, hex });
+  document.getElementById('colorName').value = '';
+  renderColorsList();
+}
+
+function removeColor(idx) {
+  currentColors.splice(idx, 1);
+  renderColorsList();
+}
+
+function renderColorsList() {
+  const list = document.getElementById('colorsList');
+  if (!currentColors.length) {
+    list.innerHTML = '<span style="font-size:0.72rem;color:var(--text-muted);letter-spacing:1px">Sin colores — el panel mostrará solo talles</span>';
+    return;
+  }
+  list.innerHTML = currentColors.map((c, i) => `
+    <div class="color-chip">
+      <div class="color-chip-dot" style="background:${c.hex}"></div>
+      ${c.name}
+      <button class="color-chip-remove" onclick="removeColor(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
 // ── MODAL PRODUCTO ──
 function handleOverlayClick(e) { if (e.target === document.getElementById('modalOverlay')) closeModal(); }
 function handleConfirmOverlayClick(e) { if (e.target === document.getElementById('confirmOverlay')) closeConfirm(); }
 
 function openModal(id) {
+  currentImgs = [];
+  currentColors = [];
   document.getElementById('modalOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
+
   if (id) {
     const p = products.find(x => x.id === id);
     if (!p) return;
@@ -501,23 +649,15 @@ function openModal(id) {
     document.getElementById('fPrice').value = p.price;
     document.getElementById('fStock').value = p.stock;
     document.getElementById('fSeason').value = p.season || 'all';
-    document.getElementById('fEmoji').value = p.emoji || '';
     document.getElementById('fSizes').value = p.sizes ? p.sizes.join(', ') : '';
     document.getElementById('fActive').checked = p.active;
     document.getElementById('fOnOffer').checked = p.onOffer || false;
-    currentImgBase64 = p.img || null;
-    if (p.img) {
-      document.getElementById('imgPreview').src = p.img;
-      document.getElementById('imgPreview').classList.add('visible');
-      document.getElementById('imgUploadText').style.display = 'none';
-      document.getElementById('imgRemoveBtn').classList.add('visible');
-    } else {
-      document.getElementById('imgPreview').classList.remove('visible');
-      document.getElementById('imgUploadText').style.display = '';
-      document.getElementById('imgRemoveBtn').classList.remove('visible');
-    }
     document.getElementById('fOriginalPrice').value = p.originalPrice || '';
     document.getElementById('offerFields').classList.toggle('visible', !!p.onOffer);
+    // Fotos
+    currentImgs = p.imgs ? [...p.imgs] : (p.img ? [p.img] : []);
+    // Colores
+    currentColors = p.colors ? [...p.colors] : [];
   } else {
     document.getElementById('modalTitle').textContent = 'Nuevo producto';
     document.getElementById('editId').value = '';
@@ -527,19 +667,16 @@ function openModal(id) {
     document.getElementById('fPrice').value = '';
     document.getElementById('fStock').value = '';
     document.getElementById('fSeason').value = 'all';
-    document.getElementById('fEmoji').value = '👗';
     document.getElementById('fSizes').value = 'XS, S, M, L';
     document.getElementById('fActive').checked = true;
     document.getElementById('fOnOffer').checked = false;
-    currentImgBase64 = null;
-    document.getElementById('imgPreview').classList.remove('visible');
-    document.getElementById('imgUploadText').style.display = '';
-    document.getElementById('imgRemoveBtn').classList.remove('visible');
-    document.getElementById('fImg').value = '';
     document.getElementById('fOriginalPrice').value = '';
     document.getElementById('offerFields').classList.remove('visible');
   }
+  renderImgGrid();
+  renderColorsList();
 }
+
 function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); document.body.style.overflow = ''; }
 function toggleOfferFields() { document.getElementById('offerFields').classList.toggle('visible', document.getElementById('fOnOffer').checked); }
 
@@ -564,9 +701,11 @@ async function saveProduct() {
         ...products[idx], name, category,
         desc: document.getElementById('fDesc').value.trim(),
         price, stock, season,
-        emoji: document.getElementById('fEmoji').value.trim() || '👗',
-        img: currentImgBase64,
-        sizes, active: document.getElementById('fActive').checked,
+        imgs: [...currentImgs],
+        img: currentImgs[0] || null,
+        emoji: currentImgs.length ? null : '👗',
+        sizes, colors: [...currentColors],
+        active: document.getElementById('fActive').checked,
         onOffer, originalPrice
       };
       await upsertProduct(products[idx]);
@@ -577,10 +716,12 @@ async function saveProduct() {
       id: nextId(), name, category,
       desc: document.getElementById('fDesc').value.trim(),
       price, stock, season,
-      emoji: document.getElementById('fEmoji').value.trim() || '👗',
-      sizes, active: document.getElementById('fActive').checked,
+      emoji: currentImgs.length ? null : '👗',
+      imgs: [...currentImgs],
+      img: currentImgs[0] || null,
+      sizes, colors: [...currentColors],
+      active: document.getElementById('fActive').checked,
       onOffer, originalPrice,
-      img: currentImgBase64,
       sales: 0,
       createdAt: new Date().toISOString()
     };
@@ -604,39 +745,6 @@ async function deleteProduct(id) {
   renderStats(); renderTable(); renderCards(); closeConfirm();
   showToast(`"${p?.name}" eliminado`);
   await deleteProductDb(id);
-}
-
-// ── IMAGE ──
-function handleImageUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const img = new Image();
-    img.onload = function() {
-      const canvas = document.createElement('canvas');
-      const MAX = 800; let w = img.width, h = img.height;
-      if (w > h) { if (w > MAX) { h = h * MAX / w; w = MAX; } }
-      else { if (h > MAX) { w = w * MAX / h; h = MAX; } }
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      currentImgBase64 = canvas.toDataURL('image/jpeg', 0.8);
-      document.getElementById('imgPreview').src = currentImgBase64;
-      document.getElementById('imgPreview').classList.add('visible');
-      document.getElementById('imgUploadText').style.display = 'none';
-      document.getElementById('imgRemoveBtn').classList.add('visible');
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-}
-function removeImage(e) {
-  e.stopPropagation(); currentImgBase64 = null;
-  document.getElementById('imgPreview').src = '';
-  document.getElementById('imgPreview').classList.remove('visible');
-  document.getElementById('imgUploadText').style.display = '';
-  document.getElementById('imgRemoveBtn').classList.remove('visible');
-  document.getElementById('fImg').value = '';
 }
 
 // ── TOAST ──
