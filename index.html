@@ -60,7 +60,7 @@ section{padding:5rem 2rem}
 .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:2rem}
 .product-card{background:var(--cream);border:1px solid var(--border);border-radius:4px;overflow:hidden;transition:transform .25s,box-shadow .25s;cursor:pointer}
 .product-card:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(232,107,58,0.12)}
-.product-img{aspect-ratio:3/4;background:linear-gradient(135deg,var(--pink) 0%,var(--cream-dark) 100%);display:flex;align-items:center;justify-content:center;font-size:3.5rem;position:relative}
+.product-img{aspect-ratio:3/4;background:linear-gradient(135deg,var(--pink) 0%,var(--cream-dark) 100%);display:flex;align-items:center;justify-content:center;font-size:3.5rem;position:relative;overflow:hidden}
 .product-img img{width:100%;height:100%;object-fit:cover;display:block}
 .product-badge{position:absolute;top:12px;left:12px;background:var(--coral);color:white;font-size:0.6rem;padding:0.2rem 0.6rem;letter-spacing:2px;text-transform:uppercase}
 .product-info{padding:1.2rem}
@@ -109,35 +109,207 @@ section{padding:5rem 2rem}
 .wsp-btn:hover{background:#1aad50}
 .wsp-btn svg{width:20px;height:20px;fill:white}
 
-/* PRODUCT MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(44,24,16,0.5);z-index:300;opacity:0;pointer-events:none;transition:opacity .3s;display:flex;align-items:center;justify-content:center;padding:1rem}
-.modal-overlay.open{opacity:1;pointer-events:all}
-.modal{background:var(--white);border-radius:4px;max-width:800px;width:100%;max-height:90vh;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;transform:translateY(20px);transition:transform .3s}
-.modal-overlay.open .modal{transform:translateY(0)}
-.modal-img{background:linear-gradient(135deg,var(--pink),var(--cream-dark));display:flex;align-items:center;justify-content:center;font-size:5rem;min-height:300px;overflow:hidden}
-.modal-img img{width:100%;height:100%;object-fit:cover}
-.modal-body{padding:2rem}
-.modal-close{float:right;background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--text-muted);margin-bottom:1rem}
-.modal-category{font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--coral);margin-bottom:0.5rem}
-.modal-name{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:500;color:var(--text);margin-bottom:0.5rem}
-.modal-price{font-size:1.3rem;font-weight:600;color:var(--text);margin-bottom:1rem}
-.modal-desc{font-size:0.85rem;color:var(--text-muted);line-height:1.7;margin-bottom:1.5rem;font-weight:300}
+/* ═══════════════════════════════════════
+   PRODUCT PANEL (reemplaza modal)
+═══════════════════════════════════════ */
+.panel-overlay{position:fixed;inset:0;background:rgba(44,24,16,0.45);z-index:300;opacity:0;pointer-events:none;transition:opacity .3s}
+.panel-overlay.open{opacity:1;pointer-events:all}
+
+.product-panel{
+  position:fixed;top:0;right:0;bottom:0;
+  width:min(580px,100vw);
+  background:var(--white);
+  z-index:301;
+  transform:translateX(100%);
+  transition:transform .38s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+.product-panel.open{transform:translateX(0)}
+
+/* Panel header */
+.panel-header{
+  padding:1.2rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+}
+.panel-close{
+  background:none;border:none;cursor:pointer;
+  width:36px;height:36px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text-muted);font-size:1.2rem;
+  transition:background .2s,color .2s;
+}
+.panel-close:hover{background:var(--cream-dark);color:var(--text)}
+.panel-breadcrumb{font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted)}
+
+/* Panel scroll */
+.panel-scroll{flex:1;overflow-y:auto;overscroll-behavior:contain}
+
+/* Galería de fotos */
+.panel-gallery{position:relative;background:var(--cream-dark)}
+.panel-main-img{
+  aspect-ratio:4/3;
+  display:flex;align-items:center;justify-content:center;
+  font-size:5rem;
+  overflow:hidden;
+  cursor:zoom-in;
+  position:relative;
+}
+.panel-main-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
+.panel-main-img:hover img{transform:scale(1.03)}
+
+/* Botones navegar galería */
+.gallery-nav{
+  position:absolute;top:50%;transform:translateY(-50%);
+  background:rgba(255,255,255,0.9);border:none;
+  width:38px;height:38px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:1rem;color:var(--text);
+  box-shadow:0 2px 12px rgba(0,0,0,0.12);
+  transition:all .2s;z-index:2;
+}
+.gallery-nav:hover{background:white;box-shadow:0 4px 16px rgba(0,0,0,0.18)}
+.gallery-nav.prev{left:12px}
+.gallery-nav.next{right:12px}
+.gallery-nav.hidden{opacity:0;pointer-events:none}
+
+/* Thumbnails */
+.panel-thumbs{
+  display:flex;gap:8px;padding:10px 12px;
+  overflow-x:auto;scrollbar-width:none;
+}
+.panel-thumbs::-webkit-scrollbar{display:none}
+.panel-thumb{
+  width:60px;height:72px;flex-shrink:0;
+  border-radius:3px;overflow:hidden;
+  border:2px solid transparent;
+  cursor:pointer;transition:border-color .2s;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--cream);font-size:1.5rem;
+}
+.panel-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.panel-thumb.active{border-color:var(--coral)}
+
+/* Indicador de foto */
+.gallery-dots{
+  position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+  display:flex;gap:5px;
+}
+.gallery-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:rgba(255,255,255,0.5);border:none;cursor:pointer;
+  transition:background .2s,transform .2s;padding:0;
+}
+.gallery-dot.active{background:white;transform:scale(1.3)}
+
+/* Panel body */
+.panel-body{padding:1.5rem}
+
+.panel-category{font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--coral);margin-bottom:0.4rem}
+.panel-name{font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:500;color:var(--text);margin-bottom:0.6rem;line-height:1.2}
+.panel-price{font-size:1.25rem;font-weight:600;color:var(--text);margin-bottom:1rem}
+.panel-desc{font-size:0.85rem;color:var(--text-muted);line-height:1.7;margin-bottom:1.5rem;font-weight:300}
+
+/* Selección de color */
+.color-label{font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.6rem}
+.colors{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.5rem}
+.color-swatch{
+  width:30px;height:30px;border-radius:50%;
+  border:3px solid transparent;cursor:pointer;
+  transition:transform .18s,border-color .18s;
+  position:relative;outline:none;
+}
+.color-swatch:hover{transform:scale(1.12)}
+.color-swatch.active{border-color:var(--coral);transform:scale(1.12)}
+.color-swatch .swatch-inner{
+  position:absolute;inset:2px;border-radius:50%;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,0.1);
+}
+.color-name-display{
+  font-size:0.72rem;color:var(--text-muted);margin-top:-1rem;margin-bottom:1.2rem;
+  letter-spacing:1px;min-height:1em;
+}
+
+/* Selección de talle */
 .size-label{font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.6rem}
 .sizes{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem}
 .size-opt{padding:0.4rem 0.8rem;border:1px solid var(--border);background:none;border-radius:2px;font-size:0.78rem;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
 .size-opt.active{border-color:var(--coral);background:var(--coral);color:white}
 .size-opt:hover:not(.active){border-color:var(--coral);color:var(--coral)}
-.modal-add-btn{width:100%;padding:1rem;background:var(--coral);color:white;border:none;font-size:0.8rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:2px;font-family:'Inter',sans-serif;font-weight:600;transition:background .2s}
-.modal-add-btn:hover{background:#C8512A}
-.talle-help{display:block;text-align:center;margin-top:0.8rem;font-size:0.75rem;color:var(--text-muted);text-decoration:none;letter-spacing:1px;transition:color .2s}
+
+.panel-add-btn{width:100%;padding:1rem;background:var(--coral);color:white;border:none;font-size:0.8rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:2px;font-family:'Inter',sans-serif;font-weight:600;transition:background .2s;margin-bottom:0.8rem}
+.panel-add-btn:hover{background:#C8512A}
+.talle-help{display:block;text-align:center;margin-bottom:1.5rem;font-size:0.75rem;color:var(--text-muted);text-decoration:none;letter-spacing:1px;transition:color .2s}
 .talle-help:hover{color:var(--coral)}
+
+/* Productos relacionados */
+.panel-related{padding:0 1.5rem 2rem}
+.panel-related-title{
+  font-size:0.7rem;letter-spacing:3px;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:1rem;
+  padding-top:1.2rem;border-top:1px solid var(--border);
+}
+.related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.related-card{cursor:pointer;border-radius:3px;overflow:hidden;border:1px solid var(--border);transition:transform .2s,box-shadow .2s}
+.related-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(232,107,58,0.1)}
+.related-img{aspect-ratio:3/4;background:linear-gradient(135deg,var(--pink),var(--cream-dark));display:flex;align-items:center;justify-content:center;font-size:2rem;overflow:hidden}
+.related-img img{width:100%;height:100%;object-fit:cover;display:block}
+.related-info{padding:0.5rem 0.6rem;background:var(--cream)}
+.related-name{font-family:'Cormorant Garamond',serif;font-size:0.85rem;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.related-price{font-size:0.75rem;font-weight:600;color:var(--coral)}
+
+/* ═══════════════════════════════════════
+   FULLSCREEN DE FOTOS
+═══════════════════════════════════════ */
+.fullscreen-overlay{
+  position:fixed;inset:0;
+  background:rgba(10,5,3,0.95);
+  z-index:600;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.fullscreen-overlay.open{opacity:1;pointer-events:all}
+.fullscreen-img{
+  max-width:90vw;max-height:90vh;
+  object-fit:contain;
+  border-radius:2px;
+  display:block;
+}
+.fullscreen-emoji{font-size:8rem;color:white}
+.fullscreen-close{
+  position:fixed;top:1.5rem;right:1.5rem;
+  background:rgba(255,255,255,0.15);border:none;
+  color:white;font-size:1.4rem;
+  width:44px;height:44px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:background .2s;
+}
+.fullscreen-close:hover{background:rgba(255,255,255,0.25)}
+.fullscreen-nav{
+  position:fixed;top:50%;transform:translateY(-50%);
+  background:rgba(255,255,255,0.15);border:none;
+  color:white;font-size:1.4rem;
+  width:48px;height:48px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:background .2s;
+}
+.fullscreen-nav:hover{background:rgba(255,255,255,0.25)}
+.fullscreen-nav.prev{left:1.5rem}
+.fullscreen-nav.next{right:1.5rem}
+.fullscreen-nav.hidden{display:none}
+.fullscreen-counter{
+  position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);
+  color:rgba(255,255,255,0.6);font-size:0.8rem;letter-spacing:2px;
+}
 
 /* CART SECURITY BANNER */
 .cart-security{display:flex;align-items:center;justify-content:center;gap:1.5rem;padding:0.8rem 1rem;background:var(--cream);border-radius:4px;margin-bottom:1rem;flex-wrap:wrap}
 .cart-security span{font-size:0.68rem;color:var(--text-muted);letter-spacing:1px;display:flex;align-items:center;gap:0.3rem}
 
 /* CONFIRMATION SCREEN */
-.confirmation{position:fixed;inset:0;background:var(--cream);z-index:600;display:flex;align-items:center;justify-content:center;padding:2rem;opacity:0;pointer-events:none;transition:opacity .4s}
+.confirmation{position:fixed;inset:0;background:var(--cream);z-index:700;display:flex;align-items:center;justify-content:center;padding:2rem;opacity:0;pointer-events:none;transition:opacity .4s}
 .confirmation.open{opacity:1;pointer-events:all}
 .confirmation-box{text-align:center;max-width:420px}
 .confirmation-icon{font-size:4rem;margin-bottom:1rem;display:block}
@@ -206,7 +378,7 @@ footer{background:var(--text);color:var(--cream);padding:3rem 2rem;text-align:ce
 .card-cancel-btn:hover{border-color:var(--coral)!important;color:var(--coral)}
 
 /* TOAST */
-.toast{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--cream);padding:0.8rem 1.5rem;border-radius:2px;font-size:0.8rem;letter-spacing:1px;z-index:500;opacity:0;transition:all .3s;pointer-events:none}
+.toast{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--cream);padding:0.8rem 1.5rem;border-radius:2px;font-size:0.8rem;letter-spacing:1px;z-index:800;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* HAMBURGER MENU */
@@ -244,13 +416,11 @@ footer{background:var(--text);color:var(--cream);padding:3rem 2rem;text-align:ce
   #ofertas{padding:3rem 0 3rem 1.2rem}
   .section-title{margin-bottom:1.5rem;font-size:1.8rem}
 
-  /* Ofertas: scroll horizontal */
   .ofertas-grid{display:flex;overflow-x:auto;gap:1rem;padding-right:1.2rem;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   .ofertas-grid::-webkit-scrollbar{display:none}
   .oferta-card{min-width:160px;flex-shrink:0;scroll-snap-align:start}
   .oferta-img{aspect-ratio:3/4}
 
-  /* Productos: 2 columnas */
   .products-grid{grid-template-columns:repeat(2,1fr);gap:0.8rem}
   .product-info{padding:0.8rem}
   .product-name{font-size:1rem}
@@ -258,34 +428,28 @@ footer{background:var(--text);color:var(--cream);padding:3rem 2rem;text-align:ce
   .product-price{font-size:0.9rem}
   .add-btn{padding:0.45rem 0.7rem;font-size:0.65rem}
 
-  /* Filters: scroll horizontal */
   .filters{flex-wrap:nowrap;overflow-x:auto;padding-bottom:0.5rem;scrollbar-width:none;-webkit-overflow-scrolling:touch}
   .filters::-webkit-scrollbar{display:none}
   .filter-btn{white-space:nowrap;flex-shrink:0}
 
-  /* Cart: pantalla completa */
   .cart-sidebar{width:100vw;border-radius:0}
 
-  /* Modal: pantalla completa */
-  .modal-overlay{padding:0;align-items:flex-end}
-  .modal{grid-template-columns:1fr;border-radius:12px 12px 0 0;max-height:92vh}
-  .modal-img{min-height:220px;max-height:240px}
-  .modal-body{padding:1.2rem}
-  .modal-name{font-size:1.4rem}
-  .modal-close{font-size:1.4rem;padding:0.4rem}
+  /* Panel en mobile: pantalla completa */
+  .product-panel{width:100vw}
+  .panel-main-img{aspect-ratio:1/1}
+  .related-grid{grid-template-columns:repeat(3,1fr)}
 
-  /* Info */
   .info-grid{grid-template-columns:1fr}
 
-  /* Qty buttons más grandes */
   .qty-btn{width:34px;height:34px;font-size:1rem}
 
-  /* Card modal */
   .card-modal{align-items:flex-end;padding:0}
   .card-modal-box{border-radius:12px 12px 0 0;max-width:100%}
 
-  /* Float WSP sube para dejar espacio al cart */
   .float-wsp{bottom:1.8rem}
+
+  .fullscreen-nav.prev{left:0.5rem}
+  .fullscreen-nav.next{right:0.5rem}
 }
 
 @media(max-width:380px){
@@ -430,22 +594,64 @@ footer{background:var(--text);color:var(--cream);padding:3rem 2rem;text-align:ce
   </div>
 </div>
 
-<!-- PRODUCT MODAL -->
-<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
-  <div class="modal" id="productModal">
-    <div class="modal-img" id="modalImg"></div>
-    <div class="modal-body">
-      <button class="modal-close" onclick="closeModalBtn()">✕</button>
-      <div class="modal-category" id="modalCategory"></div>
-      <div class="modal-name" id="modalName"></div>
-      <div class="modal-price" id="modalPrice"></div>
-      <div class="modal-desc" id="modalDesc"></div>
+<!-- PRODUCT PANEL -->
+<div class="panel-overlay" id="panelOverlay" onclick="closePanelOverlay(event)"></div>
+<div class="product-panel" id="productPanel">
+
+  <div class="panel-header">
+    <span class="panel-breadcrumb" id="panelBreadcrumb">Producto</span>
+    <button class="panel-close" onclick="closePanel()">✕</button>
+  </div>
+
+  <div class="panel-scroll" id="panelScroll">
+
+    <!-- Galería -->
+    <div class="panel-gallery">
+      <div class="panel-main-img" id="panelMainImg" onclick="openFullscreen()">
+        <!-- imagen principal dinámica -->
+      </div>
+      <div class="panel-thumbs" id="panelThumbs"></div>
+    </div>
+
+    <!-- Info -->
+    <div class="panel-body">
+      <div class="panel-category" id="panelCategory"></div>
+      <div class="panel-name" id="panelName"></div>
+      <div class="panel-price" id="panelPrice"></div>
+      <div class="panel-desc" id="panelDesc"></div>
+
+      <!-- Colores -->
+      <div id="colorSection" style="display:none">
+        <div class="color-label">Color</div>
+        <div class="colors" id="panelColors"></div>
+        <div class="color-name-display" id="colorNameDisplay"></div>
+      </div>
+
+      <!-- Talles -->
       <div class="size-label">Talle</div>
-      <div class="sizes" id="modalSizes"></div>
-      <button class="modal-add-btn" onclick="addFromModal()">Agregar al carrito</button>
+      <div class="sizes" id="panelSizes"></div>
+
+      <button class="panel-add-btn" onclick="addFromPanel()">Agregar al carrito</button>
       <a href="https://wa.me/5492235396641?text=Hola%20Kala!%20No%20s%C3%A9%20qu%C3%A9%20talle%20elegir%2C%20%C2%BFme%20pueden%20ayudar%3F" target="_blank" class="talle-help">¿No sabés tu talle? Consultanos por WhatsApp</a>
     </div>
+
+    <!-- Productos relacionados -->
+    <div class="panel-related" id="panelRelated" style="display:none">
+      <div class="panel-related-title">También te puede gustar</div>
+      <div class="related-grid" id="relatedGrid"></div>
+    </div>
+
   </div>
+</div>
+
+<!-- FULLSCREEN OVERLAY -->
+<div class="fullscreen-overlay" id="fullscreenOverlay" onclick="closeFullscreenOverlay(event)">
+  <button class="fullscreen-close" onclick="closeFullscreen()">✕</button>
+  <button class="fullscreen-nav prev" id="fsNavPrev" onclick="fsNavigate(-1)">‹</button>
+  <img class="fullscreen-img" id="fullscreenImg" src="" alt="" style="display:none">
+  <div class="fullscreen-emoji" id="fullscreenEmoji" style="display:none"></div>
+  <button class="fullscreen-nav next" id="fsNavNext" onclick="fsNavigate(1)">›</button>
+  <div class="fullscreen-counter" id="fullscreenCounter"></div>
 </div>
 
 <!-- CARD PAYMENT MODAL -->
@@ -496,17 +702,25 @@ const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let products = [];
 let cart = [];
 let activeFilter = 'Todos';
-let selectedProduct = null;
-let selectedSize = null;
 
-// ─── INIT CON SUPABASE + TIEMPO REAL ───
+// Estado del panel
+let panelProduct = null;
+let panelSelectedSize = null;
+let panelSelectedColor = null;
+let panelCurrentImg = 0;
+let panelImages = []; // array de urls o null
+
+// Estado fullscreen
+let fsImages = [];
+let fsCurrentIdx = 0;
+
+// ─── INIT ───
 async function init() {
   await loadProducts();
   const savedCart = localStorage.getItem('kala_cart');
   cart = savedCart ? JSON.parse(savedCart) : [];
   updateCartUI();
 
-  // Suscripción en tiempo real: cuando el admin cambia algo, la web se actualiza sola
   db.channel('products-changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
       loadProducts();
@@ -520,21 +734,42 @@ async function loadProducts() {
     .select('*')
     .order('created_at', { ascending: true });
   if (error) { console.error('Error cargando productos:', error); return; }
-  products = (data || []).map(row => ({
-    id: row.id,
-    name: row.name,
-    category: row.category,
-    price: Number(row.price),
-    originalPrice: row.original_price ? Number(row.original_price) : null,
-    onOffer: !!row.original_price,
-    stock: row.stock || 0,
-    season: row.season || 'all',
-    active: row.active !== false,
-    img: row.img || null,
-    emoji: row.img ? null : '👗',
-    sizes: row.sizes || ['Único'],
-    desc: row["desc"] || ''
-  }));
+  products = (data || []).map(row => {
+    // Soporte para múltiples imágenes: img puede ser string (url) o JSON array de urls
+    let imgs = [];
+    if (row.img) {
+      try {
+        const parsed = JSON.parse(row.img);
+        imgs = Array.isArray(parsed) ? parsed : [row.img];
+      } catch {
+        imgs = [row.img];
+      }
+    }
+    // Soporte para colores: campo colors en Supabase (JSON array de {name, hex})
+    let colors = [];
+    if (row.colors) {
+      try {
+        colors = typeof row.colors === 'string' ? JSON.parse(row.colors) : row.colors;
+      } catch { colors = []; }
+    }
+    return {
+      id: row.id,
+      name: row.name,
+      category: row.category,
+      price: Number(row.price),
+      originalPrice: row.original_price ? Number(row.original_price) : null,
+      onOffer: !!row.original_price,
+      stock: row.stock || 0,
+      season: row.season || 'all',
+      active: row.active !== false,
+      imgs,                          // array de fotos
+      img: imgs[0] || null,          // primera foto (para cards)
+      emoji: imgs.length ? null : '👗',
+      sizes: row.sizes || ['Único'],
+      colors,                        // array de {name, hex}
+      desc: row["desc"] || ''
+    };
+  });
   renderOfertas();
   renderFilters();
   renderProducts();
@@ -553,7 +788,7 @@ function renderOfertas() {
   }
   document.getElementById('ofertas').style.display = '';
   el.innerHTML = ofertas.map(p => `
-    <div class="oferta-card" onclick="openModal('${p.id}')">
+    <div class="oferta-card" onclick="openPanel('${p.id}')">
       <div class="oferta-badge">-${calcDiscount(p.originalPrice, p.price)}%</div>
       <div class="oferta-img">${p.img ? `<img src="${p.img}" alt="${p.name}">` : p.emoji || '👗'}</div>
       <div class="oferta-info">
@@ -594,8 +829,10 @@ function renderProducts() {
     return;
   }
   el.innerHTML = filtered.map(p => `
-    <div class="product-card" onclick="openModal('${p.id}')">
-      <div class="product-img">${p.img ? `<img src="${p.img}" alt="${p.name}">` : p.emoji || '👗'}</div>
+    <div class="product-card" onclick="openPanel('${p.id}')">
+      <div class="product-img">${p.img ? `<img src="${p.img}" alt="${p.name}">` : p.emoji || '👗'}
+        ${p.onOffer ? `<div class="product-badge">Oferta</div>` : ''}
+      </div>
       <div class="product-info">
         <div class="product-category">${p.category}</div>
         <div class="product-name">${p.name}</div>
@@ -609,45 +846,201 @@ function renderProducts() {
   `).join('');
 }
 
-// ─── MODAL ───
-function openModal(id) {
+// ─── PANEL ───
+function openPanel(id) {
   const p = products.find(x => x.id === id);
   if (!p) return;
-  selectedProduct = p;
-  selectedSize = p.sizes[0];
-  document.getElementById('modalImg').innerHTML = p.img ? `<img src="${p.img}" alt="${p.name}">` : (p.emoji || '👗');
-  document.getElementById('modalCategory').textContent = p.category;
-  document.getElementById('modalName').textContent = p.name;
-  document.getElementById('modalPrice').innerHTML = p.onOffer && p.originalPrice
+  panelProduct = p;
+  panelSelectedSize = p.sizes[0];
+  panelSelectedColor = p.colors.length ? p.colors[0] : null;
+  panelCurrentImg = 0;
+  panelImages = p.imgs.length ? p.imgs : [null]; // null = emoji
+
+  // Breadcrumb
+  document.getElementById('panelBreadcrumb').textContent = p.category;
+
+  // Galería
+  renderPanelGallery();
+
+  // Info
+  document.getElementById('panelCategory').textContent = p.category;
+  document.getElementById('panelName').textContent = p.name;
+  document.getElementById('panelPrice').innerHTML = p.onOffer && p.originalPrice
     ? `<span style="text-decoration:line-through;color:var(--text-muted);font-size:0.9rem;margin-right:0.5rem">${formatPrice(p.originalPrice)}</span><span style="color:var(--coral)">${formatPrice(p.price)}</span>`
     : formatPrice(p.price);
-  document.getElementById('modalDesc').textContent = p.desc;
-  document.getElementById('modalSizes').innerHTML = p.sizes.map(s => `
-    <button class="size-opt ${s === selectedSize ? 'active' : ''}" onclick="selectSize('${s}')">${s}</button>
+  document.getElementById('panelDesc').textContent = p.desc;
+
+  // Colores
+  const colorSection = document.getElementById('colorSection');
+  if (p.colors && p.colors.length > 0) {
+    colorSection.style.display = '';
+    document.getElementById('panelColors').innerHTML = p.colors.map((c, i) => `
+      <button class="color-swatch ${i === 0 ? 'active' : ''}"
+        style="background:${c.hex || c}"
+        onclick="selectColor(${i})"
+        title="${c.name || c}">
+        <div class="swatch-inner"></div>
+      </button>
+    `).join('');
+    document.getElementById('colorNameDisplay').textContent = p.colors[0].name || '';
+  } else {
+    colorSection.style.display = 'none';
+  }
+
+  // Talles
+  document.getElementById('panelSizes').innerHTML = p.sizes.map((s, i) => `
+    <button class="size-opt ${i === 0 ? 'active' : ''}" onclick="selectPanelSize('${s}')">${s}</button>
   `).join('');
-  document.getElementById('modalOverlay').classList.add('open');
+
+  // Relacionados (misma categoría, excluyendo el actual)
+  const related = products.filter(x => x.active && x.stock > 0 && x.id !== p.id && x.category === p.category).slice(0, 3);
+  const relatedSection = document.getElementById('panelRelated');
+  if (related.length) {
+    relatedSection.style.display = '';
+    document.getElementById('relatedGrid').innerHTML = related.map(r => `
+      <div class="related-card" onclick="openPanel('${r.id}')">
+        <div class="related-img">${r.img ? `<img src="${r.img}" alt="${r.name}">` : r.emoji || '👗'}</div>
+        <div class="related-info">
+          <div class="related-name">${r.name}</div>
+          <div class="related-price">${formatPrice(r.price)}</div>
+        </div>
+      </div>
+    `).join('');
+  } else {
+    relatedSection.style.display = 'none';
+  }
+
+  // Scroll al top del panel
+  document.getElementById('panelScroll').scrollTop = 0;
+
+  // Abrir
+  document.getElementById('panelOverlay').classList.add('open');
+  document.getElementById('productPanel').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
-function selectSize(s) {
-  selectedSize = s;
-  document.querySelectorAll('.size-opt').forEach(b => b.classList.toggle('active', b.textContent === s));
+
+function renderPanelGallery() {
+  const mainEl = document.getElementById('panelMainImg');
+  const thumbsEl = document.getElementById('panelThumbs');
+  const img = panelImages[panelCurrentImg];
+
+  // Imagen principal
+  mainEl.innerHTML = img
+    ? `<img src="${img}" alt="${panelProduct.name}">`
+    : `<span style="font-size:5rem">${panelProduct.emoji || '👗'}</span>`;
+
+  // Botones navegar (solo si hay más de 1 foto)
+  const hasPrev = panelCurrentImg > 0;
+  const hasNext = panelCurrentImg < panelImages.length - 1;
+
+  // Dots
+  if (panelImages.length > 1) {
+    const dotsHtml = panelImages.map((_, i) => `
+      <button class="gallery-dot ${i === panelCurrentImg ? 'active' : ''}" onclick="goToImg(${i})"></button>
+    `).join('');
+    const navHtml = `
+      <button class="gallery-nav prev ${hasPrev ? '' : 'hidden'}" onclick="event.stopPropagation();galleryNav(-1)">‹</button>
+      <button class="gallery-nav next ${hasNext ? '' : 'hidden'}" onclick="event.stopPropagation();galleryNav(1)">›</button>
+      <div class="gallery-dots">${dotsHtml}</div>
+    `;
+    mainEl.insertAdjacentHTML('beforeend', navHtml);
+  }
+
+  // Thumbnails
+  if (panelImages.length > 1) {
+    thumbsEl.innerHTML = panelImages.map((src, i) => `
+      <div class="panel-thumb ${i === panelCurrentImg ? 'active' : ''}" onclick="goToImg(${i})">
+        ${src ? `<img src="${src}" alt="foto ${i+1}">` : panelProduct.emoji || '👗'}
+      </div>
+    `).join('');
+  } else {
+    thumbsEl.innerHTML = '';
+  }
 }
-function closeModal(e) { if (e.target.id === 'modalOverlay') closeModalBtn(); }
-function closeModalBtn() {
-  document.getElementById('modalOverlay').classList.remove('open');
+
+function galleryNav(dir) {
+  panelCurrentImg = Math.max(0, Math.min(panelImages.length - 1, panelCurrentImg + dir));
+  renderPanelGallery();
+}
+function goToImg(i) {
+  panelCurrentImg = i;
+  renderPanelGallery();
+}
+
+function selectPanelSize(s) {
+  panelSelectedSize = s;
+  document.querySelectorAll('#panelSizes .size-opt').forEach(b => b.classList.toggle('active', b.textContent === s));
+}
+
+function selectColor(i) {
+  panelSelectedColor = panelProduct.colors[i];
+  document.querySelectorAll('#panelColors .color-swatch').forEach((b, idx) => b.classList.toggle('active', idx === i));
+  document.getElementById('colorNameDisplay').textContent = panelProduct.colors[i].name || '';
+}
+
+function closePanelOverlay(e) {
+  if (e.target.id === 'panelOverlay') closePanel();
+}
+function closePanel() {
+  document.getElementById('panelOverlay').classList.remove('open');
+  document.getElementById('productPanel').classList.remove('open');
   document.body.style.overflow = '';
-  selectedProduct = null;
+  panelProduct = null;
 }
-function addFromModal() {
-  if (!selectedProduct) return;
-  addToCart(selectedProduct, selectedSize);
-  closeModalBtn();
+
+function addFromPanel() {
+  if (!panelProduct) return;
+  const colorLabel = panelSelectedColor ? ` · ${panelSelectedColor.name || panelSelectedColor}` : '';
+  addToCart(panelProduct, panelSelectedSize + colorLabel);
+  closePanel();
 }
+
 function quickAdd(id) {
   const p = products.find(x => x.id === id);
   if (!p) return;
-  if (p.sizes.length > 1) { openModal(id); return; }
+  if (p.sizes.length > 1 || p.colors.length > 0) { openPanel(id); return; }
   addToCart(p, p.sizes[0]);
+}
+
+// ─── FULLSCREEN ───
+function openFullscreen() {
+  if (!panelProduct) return;
+  fsImages = panelImages;
+  fsCurrentIdx = panelCurrentImg;
+  renderFullscreen();
+  document.getElementById('fullscreenOverlay').classList.add('open');
+}
+function renderFullscreen() {
+  const src = fsImages[fsCurrentIdx];
+  const imgEl = document.getElementById('fullscreenImg');
+  const emojiEl = document.getElementById('fullscreenEmoji');
+  if (src) {
+    imgEl.src = src;
+    imgEl.style.display = 'block';
+    emojiEl.style.display = 'none';
+  } else {
+    imgEl.style.display = 'none';
+    emojiEl.style.display = 'block';
+    emojiEl.textContent = panelProduct ? (panelProduct.emoji || '👗') : '👗';
+  }
+  const counter = document.getElementById('fullscreenCounter');
+  if (fsImages.length > 1) {
+    counter.textContent = `${fsCurrentIdx + 1} / ${fsImages.length}`;
+  } else {
+    counter.textContent = '';
+  }
+  document.getElementById('fsNavPrev').classList.toggle('hidden', fsCurrentIdx === 0);
+  document.getElementById('fsNavNext').classList.toggle('hidden', fsCurrentIdx === fsImages.length - 1);
+}
+function fsNavigate(dir) {
+  fsCurrentIdx = Math.max(0, Math.min(fsImages.length - 1, fsCurrentIdx + dir));
+  renderFullscreen();
+}
+function closeFullscreen() {
+  document.getElementById('fullscreenOverlay').classList.remove('open');
+}
+function closeFullscreenOverlay(e) {
+  if (e.target.id === 'fullscreenOverlay') closeFullscreen();
 }
 
 // ─── CART ───
@@ -677,9 +1070,8 @@ function updateCartUI() {
   const count = cart.reduce((s, i) => s + i.qty, 0);
   document.getElementById('cartCount').textContent = count;
   document.getElementById('cartCount').style.display = count ? 'flex' : 'none';
-  const floatCart = document.getElementById('floatCart');
   document.getElementById('floatCartCount').textContent = count;
-  floatCart.classList.toggle('visible', count > 0);
+  document.getElementById('floatCart').classList.toggle('visible', count > 0);
 }
 
 // ─── CART SIDEBAR ───
@@ -732,10 +1124,8 @@ function sendWhatsApp() {
 function showConfirmation() {
   document.getElementById('confirmationScreen').classList.add('open');
   cart = []; saveCart(); updateCartUI();
-  const sidebar = document.getElementById('cartSidebar');
-  const overlay = document.getElementById('cartOverlay');
-  sidebar.classList.remove('open');
-  overlay.classList.remove('open');
+  document.getElementById('cartSidebar').classList.remove('open');
+  document.getElementById('cartOverlay').classList.remove('open');
   document.body.style.overflow = '';
 }
 function closeConfirmation() {
@@ -759,10 +1149,8 @@ function sendCardPayment() {
 
 // ─── HAMBURGER ───
 function toggleMenu() {
-  const h = document.getElementById('hamburger');
-  const m = document.getElementById('mobileMenu');
-  h.classList.toggle('open');
-  m.classList.toggle('open');
+  document.getElementById('hamburger').classList.toggle('open');
+  document.getElementById('mobileMenu').classList.toggle('open');
 }
 function closeMenu() {
   document.getElementById('hamburger').classList.remove('open');
@@ -775,6 +1163,15 @@ function showToast(msg) {
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2500);
 }
+
+// ─── ESC KEY ───
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('fullscreenOverlay').classList.contains('open')) { closeFullscreen(); return; }
+    if (document.getElementById('productPanel').classList.contains('open')) { closePanel(); return; }
+    if (document.getElementById('cartSidebar').classList.contains('open')) { toggleCart(); }
+  }
+});
 
 window.addEventListener('load', init);
 </script>
