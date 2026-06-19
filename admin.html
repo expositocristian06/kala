@@ -134,6 +134,12 @@ tr:hover td{background:var(--cream)}
 .btn-add-color{background:var(--coral);color:white;border:none;border-radius:4px;padding:0.55rem 0.9rem;font-size:0.72rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap}
 .btn-add-color:hover{background:#C8512A}
 
+/* ── TALLES ── */
+.size-presets-row{display:flex;gap:8px;flex-wrap:wrap}
+.size-preset-btn{background:var(--cream-dark);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:0.5rem 0.9rem;font-size:0.78rem;cursor:pointer;font-family:'Inter',sans-serif}
+.size-preset-btn:hover{border-color:var(--coral)}
+.size-preset-btn.selected{background:var(--coral);color:white;border-color:var(--coral)}
+
 .modal-footer{padding:0 1.5rem 2rem;display:flex;gap:0.8rem;justify-content:flex-end}
 .btn-cancel{background:none;border:1px solid var(--border);padding:0.7rem 1.4rem;border-radius:4px;font-size:0.78rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;color:var(--text-muted);font-family:'Inter',sans-serif;min-height:44px}
 .btn-cancel:hover{border-color:var(--coral);color:var(--coral)}
@@ -251,7 +257,23 @@ tr:hover td{background:var(--cream)}
             <option value="primavera">Primavera</option>
           </select>
         </div>
-        <div class="form-group"><label>Talles (separados por coma)</label><input type="text" id="fSizes" placeholder="Ej: XS, S, M, L, XL" autocomplete="off"></div>
+        <div class="form-group"><label>Tipo de talle</label>
+          <select id="fSizeType" onchange="renderSizePresets()">
+            <option value="letra">Letra (XS, S, M...)</option>
+            <option value="numero">Número (36, 38, 40...)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- TALLES -->
+      <div class="form-group colors-section">
+        <label>Talles disponibles</label>
+        <div class="colors-list" id="sizesList"></div>
+        <div class="size-presets-row" id="sizePresetsRow"></div>
+        <div class="add-color-row" style="margin-top:8px">
+          <input type="text" id="sizeCustom" placeholder="Talle personalizado (ej: Único)" maxlength="20">
+          <button type="button" class="btn-add-color" onclick="addCustomSize()">+ Agregar</button>
+        </div>
       </div>
 
       <!-- COLORES -->
@@ -317,6 +339,13 @@ let products = [];
 let currentImgs = [];
 // colores del formulario: array de {name, hex}
 let currentColors = [];
+// talles del formulario: array de strings + tipo (letra/numero)
+let currentSizes = [];
+let currentSizeType = 'letra';
+const SIZE_PRESETS = {
+  letra: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+  numero: ['36', '38', '40', '42', '44', '46', '48', '50']
+};
 let sellTargetId = null;
 let sellQty = 1;
 
@@ -396,6 +425,7 @@ function dbToProduct(row) {
     img: imgs[0] || null,
     emoji: imgs.length ? null : '👗',
     sizes: row.sizes ? row.sizes : ['Único'],
+    sizeType: row.size_type || 'letra',
     colors,
     desc: row["desc"] || '',
     sales: row.sales || 0,
@@ -420,6 +450,7 @@ function productToDb(p) {
     img: imgVal,
     sales: p.sales || 0,
     sizes: p.sizes || ['Único'],
+    size_type: p.sizeType || 'letra',
     colors: p.colors && p.colors.length ? p.colors : null,
     'desc': p.desc || ''
   };
@@ -628,6 +659,52 @@ function renderColorsList() {
   `).join('');
 }
 
+// ── TALLES ──
+function renderSizePresets() {
+  currentSizeType = document.getElementById('fSizeType').value;
+  const row = document.getElementById('sizePresetsRow');
+  row.innerHTML = SIZE_PRESETS[currentSizeType].map(s => `
+    <button type="button" class="size-preset-btn ${currentSizes.includes(s) ? 'selected' : ''}" onclick="toggleSize('${s}')">${s}</button>
+  `).join('');
+}
+
+function toggleSize(s) {
+  const idx = currentSizes.indexOf(s);
+  if (idx > -1) currentSizes.splice(idx, 1); else currentSizes.push(s);
+  renderSizesList();
+  renderSizePresets();
+}
+
+function addCustomSize() {
+  const val = document.getElementById('sizeCustom').value.trim();
+  if (!val) { showToast('Escribí un talle'); return; }
+  if (currentSizes.includes(val)) { showToast('Ese talle ya está agregado'); return; }
+  currentSizes.push(val);
+  document.getElementById('sizeCustom').value = '';
+  renderSizesList();
+  renderSizePresets();
+}
+
+function removeSize(idx) {
+  currentSizes.splice(idx, 1);
+  renderSizesList();
+  renderSizePresets();
+}
+
+function renderSizesList() {
+  const list = document.getElementById('sizesList');
+  if (!currentSizes.length) {
+    list.innerHTML = '<span style="font-size:0.72rem;color:var(--text-muted);letter-spacing:1px">Sin talles — se usará "Único"</span>';
+    return;
+  }
+  list.innerHTML = currentSizes.map((s, i) => `
+    <div class="color-chip">
+      ${s}
+      <button class="color-chip-remove" onclick="removeSize(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
 // ── MODAL PRODUCTO ──
 function handleOverlayClick(e) { if (e.target === document.getElementById('modalOverlay')) closeModal(); }
 function handleConfirmOverlayClick(e) { if (e.target === document.getElementById('confirmOverlay')) closeConfirm(); }
@@ -635,6 +712,8 @@ function handleConfirmOverlayClick(e) { if (e.target === document.getElementById
 function openModal(id) {
   currentImgs = [];
   currentColors = [];
+  currentSizes = [];
+  currentSizeType = 'letra';
   document.getElementById('modalOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 
@@ -649,7 +728,7 @@ function openModal(id) {
     document.getElementById('fPrice').value = p.price;
     document.getElementById('fStock').value = p.stock;
     document.getElementById('fSeason').value = p.season || 'all';
-    document.getElementById('fSizes').value = p.sizes ? p.sizes.join(', ') : '';
+    document.getElementById('fSizeType').value = p.sizeType || 'letra';
     document.getElementById('fActive').checked = p.active;
     document.getElementById('fOnOffer').checked = p.onOffer || false;
     document.getElementById('fOriginalPrice').value = p.originalPrice || '';
@@ -658,6 +737,8 @@ function openModal(id) {
     currentImgs = p.imgs ? [...p.imgs] : (p.img ? [p.img] : []);
     // Colores
     currentColors = p.colors ? [...p.colors] : [];
+    // Talles
+    currentSizes = p.sizes ? [...p.sizes] : [];
   } else {
     document.getElementById('modalTitle').textContent = 'Nuevo producto';
     document.getElementById('editId').value = '';
@@ -666,8 +747,9 @@ function openModal(id) {
     document.getElementById('fDesc').value = '';
     document.getElementById('fPrice').value = '';
     document.getElementById('fStock').value = '';
+    currentSizes = ['XS', 'S', 'M', 'L'];
     document.getElementById('fSeason').value = 'all';
-    document.getElementById('fSizes').value = 'XS, S, M, L';
+    document.getElementById('fSizeType').value = 'letra';
     document.getElementById('fActive').checked = true;
     document.getElementById('fOnOffer').checked = false;
     document.getElementById('fOriginalPrice').value = '';
@@ -675,6 +757,8 @@ function openModal(id) {
   }
   renderImgGrid();
   renderColorsList();
+  renderSizePresets();
+  renderSizesList();
 }
 
 function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); document.body.style.overflow = ''; }
@@ -686,9 +770,8 @@ async function saveProduct() {
   const price = parseFloat(document.getElementById('fPrice').value);
   const stock = parseInt(document.getElementById('fStock').value);
   if (!name || !category || !price || isNaN(stock)) { showToast('Completá nombre, categoría, precio y stock'); return; }
-  const sizes = document.getElementById('fSizes').value
-    ? document.getElementById('fSizes').value.split(',').map(s => s.trim()).filter(Boolean)
-    : ['Único'];
+  const sizes = currentSizes.length ? [...currentSizes] : ['Único'];
+  const sizeType = document.getElementById('fSizeType').value;
   const onOffer = document.getElementById('fOnOffer').checked;
   const originalPrice = onOffer ? parseFloat(document.getElementById('fOriginalPrice').value) || null : null;
   const season = document.getElementById('fSeason').value;
@@ -704,7 +787,7 @@ async function saveProduct() {
         imgs: [...currentImgs],
         img: currentImgs[0] || null,
         emoji: currentImgs.length ? null : '👗',
-        sizes, colors: [...currentColors],
+        sizes, sizeType, colors: [...currentColors],
         active: document.getElementById('fActive').checked,
         onOffer, originalPrice
       };
@@ -719,7 +802,7 @@ async function saveProduct() {
       emoji: currentImgs.length ? null : '👗',
       imgs: [...currentImgs],
       img: currentImgs[0] || null,
-      sizes, colors: [...currentColors],
+      sizes, sizeType, colors: [...currentColors],
       active: document.getElementById('fActive').checked,
       onOffer, originalPrice,
       sales: 0,
@@ -758,3 +841,4 @@ document.getElementById('passInput').focus();
 </script>
 </body>
 </html>
+
