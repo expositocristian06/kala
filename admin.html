@@ -145,6 +145,7 @@ tr:hover td{background:var(--cream)}
 .btn-cancel:hover{border-color:var(--coral);color:var(--coral)}
 .btn-save{background:var(--coral);color:white;border:none;padding:0.7rem 1.4rem;border-radius:4px;font-size:0.78rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;min-height:44px}
 .btn-save:hover{background:#C8512A}
+.btn-save:disabled{opacity:0.6;cursor:not-allowed}
 .confirm-box,.sell-box{background:var(--white);border-radius:12px 12px 0 0;padding:2rem;width:100%;max-width:600px;text-align:center;transform:translateY(100%);transition:transform .35s cubic-bezier(.32,.72,0,1)}
 .confirm-overlay.open .confirm-box,.sell-overlay.open .sell-box{transform:translateY(0)}
 .confirm-box h3,.sell-box h3{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:500;margin-bottom:0.5rem}
@@ -154,175 +155,176 @@ tr:hover td{background:var(--cream)}
 .qty-btn{width:44px;height:44px;border:1px solid var(--border);background:var(--cream);border-radius:8px;font-size:1.3rem;cursor:pointer;color:var(--coral);font-weight:600}
 .qty-btn:hover{border-color:var(--coral)}
 .qty-num{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:600;min-width:50px}
-.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--cream);padding:0.8rem 1.5rem;border-radius:4px;font-size:0.8rem;letter-spacing:1px;z-index:999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap}
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--cream);padding:0.8rem 1.5rem;border-radius:4px;font-size:0.8rem;letter-spacing:1px;z-index:999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.toast-error{background:var(--red);white-space:normal}
 .empty-state{text-align:center;padding:4rem 2rem;color:var(--text-muted)}
 .empty-state span{font-size:3rem;display:block;margin-bottom:1rem}
 .saving-indicator{font-size:0.72rem;color:var(--text-muted);letter-spacing:1px;opacity:0;transition:opacity .3s}
 .saving-indicator.show{opacity:1}
 @media(max-width:768px){
-  main{padding:1rem}.stats{grid-template-columns:repeat(2,1fr)}header{padding:0 1rem}
-  .form-row{grid-template-columns:1fr}.header-logo span{display:none}
-  .table-wrap{display:none}.cards-wrap{display:flex}
+main{padding:1rem}.stats{grid-template-columns:repeat(2,1fr)}header{padding:0 1rem}
+.form-row{grid-template-columns:1fr}.header-logo span{display:none}
+.table-wrap{display:none}.cards-wrap{display:flex}
 }
 @media(max-width:480px){.stats{grid-template-columns:1fr 1fr}}
 @media(min-width:769px){
-  .modal-overlay,.confirm-overlay,.sell-overlay{align-items:center;padding:1rem}
-  .modal,.confirm-box,.sell-box{border-radius:8px;transform:translateY(20px)}
-  .modal-overlay.open .modal,.confirm-overlay.open .confirm-box,.sell-overlay.open .sell-box{transform:translateY(0)}
-  .modal-handle{display:none}
+.modal-overlay,.confirm-overlay,.sell-overlay{align-items:center;padding:1rem}
+.modal,.confirm-box,.sell-box{border-radius:8px;transform:translateY(20px)}
+.modal-overlay.open .modal,.confirm-overlay.open .confirm-box,.sell-overlay.open .sell-box{transform:translateY(0)}
+.modal-handle{display:none}
 }
 </style>
 </head>
 <body>
 <div class="login-screen" id="loginScreen">
-  <div class="login-box">
-    <div class="login-logo">Kala</div>
-    <div class="login-sub">Panel de administración</div>
-    <input type="password" id="passInput" placeholder="Contraseña" onkeydown="if(event.key==='Enter')login()">
-    <button class="login-btn" onclick="login()">Ingresar</button>
-    <div class="login-error" id="loginError">Contraseña incorrecta</div>
-  </div>
+<div class="login-box">
+<div class="login-logo">Kala</div>
+<div class="login-sub">Panel de administración</div>
+<input type="password" id="passInput" placeholder="Contraseña" onkeydown="if(event.key==='Enter')login()">
+<button class="login-btn" onclick="login()">Ingresar</button>
+<div class="login-error" id="loginError">Contraseña incorrecta</div>
+</div>
 </div>
 <div class="app" id="app">
-  <header>
-    <div class="header-logo">Kala <span>Panel Admin</span></div>
-    <div class="header-actions">
-      <span class="saving-indicator" id="savingIndicator">Guardando...</span>
-      <a href="motor.html" class="motor-btn">🤖 Motor</a>
-      <a href="/" target="_blank" class="view-store-btn">🛍️ Ver tienda</a>
-      <button class="logout-btn" onclick="logout()">Salir</button>
-    </div>
-  </header>
-  <main>
-    <div class="stats" id="stats"></div>
-    <div class="toolbar">
-      <div class="toolbar-title">Productos</div>
-      <button class="add-btn" onclick="openModal()">+ Agregar producto</button>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th style="width:60px"></th><th>Producto</th><th>Categoría</th>
-          <th>Precio</th><th>Stock</th><th>Estado</th><th style="width:200px">Acciones</th>
-        </tr></thead>
-        <tbody id="productsTable"></tbody>
-      </table>
-      <div class="empty-state" id="emptyStateDesktop" style="display:none"><span>📦</span><p>No hay productos todavía.</p></div>
-    </div>
-    <div class="cards-wrap" id="cardsWrap"></div>
-    <div class="empty-state" id="emptyStateMobile" style="display:none"><span>📦</span><p>No hay productos todavía.</p></div>
-  </main>
+<header>
+<div class="header-logo">Kala <span>Panel Admin</span></div>
+<div class="header-actions">
+<span class="saving-indicator" id="savingIndicator">Guardando...</span>
+<a href="motor.html" class="motor-btn">🤖 Motor</a>
+<a href="/" target="_blank" class="view-store-btn">🛍️ Ver tienda</a>
+<button class="logout-btn" onclick="logout()">Salir</button>
+</div>
+</header>
+<main>
+<div class="stats" id="stats"></div>
+<div class="toolbar">
+<div class="toolbar-title">Productos</div>
+<button class="add-btn" onclick="openModal()">+ Agregar producto</button>
+</div>
+<div class="table-wrap">
+<table>
+<thead><tr>
+<th style="width:60px"></th><th>Producto</th><th>Categoría</th>
+<th>Precio</th><th>Stock</th><th>Estado</th><th style="width:200px">Acciones</th>
+</tr></thead>
+<tbody id="productsTable"></tbody>
+</table>
+<div class="empty-state" id="emptyStateDesktop" style="display:none"><span>📦</span><p>No hay productos todavía.</p></div>
+</div>
+<div class="cards-wrap" id="cardsWrap"></div>
+<div class="empty-state" id="emptyStateMobile" style="display:none"><span>📦</span><p>No hay productos todavía.</p></div>
+</main>
 </div>
 
 <!-- PRODUCT MODAL -->
 <div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
-  <div class="modal">
-    <div class="modal-handle" onclick="closeModal()"></div>
-    <div class="modal-header"><h2 id="modalTitle">Nuevo producto</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
-    <div class="modal-body">
-      <input type="hidden" id="editId">
-      <div class="form-row">
-        <div class="form-group"><label>Nombre del producto *</label><input type="text" id="fName" placeholder="Ej: Vestido midi floral" autocomplete="off"></div>
-        <div class="form-group"><label>Categoría *</label><input type="text" id="fCategory" placeholder="Ej: Vestidos" list="catList" autocomplete="off"><datalist id="catList"></datalist></div>
-      </div>
-      <div class="form-group"><label>Descripción</label><textarea id="fDesc" placeholder="Describe el producto..."></textarea></div>
+<div class="modal">
+<div class="modal-handle" onclick="closeModal()"></div>
+<div class="modal-header"><h2 id="modalTitle">Nuevo producto</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+<div class="modal-body">
+<input type="hidden" id="editId">
+<div class="form-row">
+<div class="form-group"><label>Nombre del producto *</label><input type="text" id="fName" placeholder="Ej: Vestido midi floral" autocomplete="off"></div>
+<div class="form-group"><label>Categoría *</label><input type="text" id="fCategory" placeholder="Ej: Vestidos" list="catList" autocomplete="off"><datalist id="catList"></datalist></div>
+</div>
+<div class="form-group"><label>Descripción</label><textarea id="fDesc" placeholder="Describe el producto..."></textarea></div>
 
-      <!-- MULTI-FOTO -->
-      <div class="form-group">
-        <label>Fotos del producto</label>
-        <div class="multi-img-area">
-          <div class="multi-img-grid" id="imgGrid">
-            <div class="multi-img-add" id="imgAddBtn">
-              <input type="file" id="fImg" accept="image/*" multiple onchange="handleImagesUpload(event)">
-              <span style="font-size:1.5rem">📷</span>
-              <span>Agregar</span>
-            </div>
-          </div>
-          <div class="multi-img-hint">La primera foto es la principal. Podés agregar hasta 6 fotos.</div>
-        </div>
-      </div>
+<!-- MULTI-FOTO -->
+<div class="form-group">
+<label>Fotos del producto</label>
+<div class="multi-img-area">
+<div class="multi-img-grid" id="imgGrid">
+<div class="multi-img-add" id="imgAddBtn">
+<input type="file" id="fImg" accept="image/*" multiple onchange="handleImagesUpload(event)">
+<span style="font-size:1.5rem">📷</span>
+<span>Agregar</span>
+</div>
+</div>
+<div class="multi-img-hint">La primera foto es la principal. Podés agregar hasta 6 fotos.</div>
+</div>
+</div>
 
-      <div class="form-row">
-        <div class="form-group"><label>Precio ($) *</label><input type="number" id="fPrice" placeholder="Ej: 24900" min="0" inputmode="numeric"></div>
-        <div class="form-group"><label>Stock (unidades) *</label><input type="number" id="fStock" placeholder="Ej: 12" min="0" inputmode="numeric"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label>Temporada</label>
-          <select id="fSeason">
-            <option value="all">Todo el año</option>
-            <option value="verano">Verano</option>
-            <option value="otono">Otoño</option>
-            <option value="invierno">Invierno</option>
-            <option value="primavera">Primavera</option>
-          </select>
-        </div>
-        <div class="form-group"><label>Tipo de talle</label>
-          <select id="fSizeType" onchange="renderSizePresets()">
-            <option value="letra">Letra (XS, S, M...)</option>
-            <option value="numero">Número (36, 38, 40...)</option>
-          </select>
-        </div>
-      </div>
+<div class="form-row">
+<div class="form-group"><label>Precio ($) *</label><input type="number" id="fPrice" placeholder="Ej: 24900" min="0" inputmode="numeric"></div>
+<div class="form-group"><label>Stock (unidades) *</label><input type="number" id="fStock" placeholder="Ej: 12" min="0" inputmode="numeric"></div>
+</div>
+<div class="form-row">
+<div class="form-group"><label>Temporada</label>
+<select id="fSeason">
+<option value="all">Todo el año</option>
+<option value="verano">Verano</option>
+<option value="otono">Otoño</option>
+<option value="invierno">Invierno</option>
+<option value="primavera">Primavera</option>
+</select>
+</div>
+<div class="form-group"><label>Tipo de talle</label>
+<select id="fSizeType" onchange="renderSizePresets()">
+<option value="letra">Letra (XS, S, M...)</option>
+<option value="numero">Número (36, 38, 40...)</option>
+</select>
+</div>
+</div>
 
-      <!-- TALLES -->
-      <div class="form-group colors-section">
-        <label>Talles disponibles</label>
-        <div class="colors-list" id="sizesList"></div>
-        <div class="size-presets-row" id="sizePresetsRow"></div>
-        <div class="add-color-row" style="margin-top:8px">
-          <input type="text" id="sizeCustom" placeholder="Talle personalizado (ej: Único)" maxlength="20">
-          <button type="button" class="btn-add-color" onclick="addCustomSize()">+ Agregar</button>
-        </div>
-      </div>
+<!-- TALLES -->
+<div class="form-group colors-section">
+<label>Talles disponibles</label>
+<div class="colors-list" id="sizesList"></div>
+<div class="size-presets-row" id="sizePresetsRow"></div>
+<div class="add-color-row" style="margin-top:8px">
+<input type="text" id="sizeCustom" placeholder="Talle personalizado (ej: Único)" maxlength="20">
+<button type="button" class="btn-add-color" onclick="addCustomSize()">+ Agregar</button>
+</div>
+</div>
 
-      <!-- COLORES -->
-      <div class="form-group colors-section">
-        <label>Colores disponibles</label>
-        <div class="colors-list" id="colorsList"></div>
-        <div class="add-color-row">
-          <input type="color" id="colorPicker" value="#E86B3A">
-          <input type="text" id="colorName" placeholder="Nombre del color (ej: Rojo)" maxlength="30">
-          <button type="button" class="btn-add-color" onclick="addColor()">+ Agregar</button>
-        </div>
-      </div>
+<!-- COLORES -->
+<div class="form-group colors-section">
+<label>Colores disponibles</label>
+<div class="colors-list" id="colorsList"></div>
+<div class="add-color-row">
+<input type="color" id="colorPicker" value="#E86B3A">
+<input type="text" id="colorName" placeholder="Nombre del color (ej: Rojo)" maxlength="30">
+<button type="button" class="btn-add-color" onclick="addColor()">+ Agregar</button>
+</div>
+</div>
 
-      <div class="form-check"><input type="checkbox" id="fActive" checked><label for="fActive">Producto activo (visible en la tienda)</label></div>
-      <div class="form-check"><input type="checkbox" id="fOnOffer" onchange="toggleOfferFields()"><label for="fOnOffer">🔥 Está en oferta</label></div>
-      <div class="offer-fields" id="offerFields">
-        <div class="form-group" style="margin-bottom:0"><label>Precio original (antes de la oferta)</label><input type="number" id="fOriginalPrice" placeholder="Ej: 32000" min="0" inputmode="numeric"></div>
-      </div>
-    </div>
-    <div class="modal-footer"><button class="btn-cancel" onclick="closeModal()">Cancelar</button><button class="btn-save" onclick="saveProduct()">Guardar producto</button></div>
-  </div>
+<div class="form-check"><input type="checkbox" id="fActive" checked><label for="fActive">Producto activo (visible en la tienda)</label></div>
+<div class="form-check"><input type="checkbox" id="fOnOffer" onchange="toggleOfferFields()"><label for="fOnOffer">🔥 Está en oferta</label></div>
+<div class="offer-fields" id="offerFields">
+<div class="form-group" style="margin-bottom:0"><label>Precio original (antes de la oferta)</label><input type="number" id="fOriginalPrice" placeholder="Ej: 32000" min="0" inputmode="numeric"></div>
+</div>
+</div>
+<div class="modal-footer"><button class="btn-cancel" onclick="closeModal()">Cancelar</button><button class="btn-save" onclick="saveProduct()">Guardar producto</button></div>
+</div>
 </div>
 
 <!-- SELL MODAL -->
 <div class="sell-overlay" id="sellOverlay" onclick="handleSellOverlayClick(event)">
-  <div class="sell-box">
-    <div class="modal-handle" onclick="closeSell()"></div>
-    <h3 id="sellTitle">Registrar venta</h3>
-    <p id="sellText">¿Cuántas unidades vendiste?</p>
-    <div class="qty-control">
-      <button class="qty-btn" onclick="changeQty(-1)">−</button>
-      <span class="qty-num" id="sellQty">1</span>
-      <button class="qty-btn" onclick="changeQty(1)">+</button>
-    </div>
-    <div class="sell-actions">
-      <button class="btn-cancel" style="flex:1" onclick="closeSell()">Cancelar</button>
-      <button class="btn-save" style="flex:1;background:var(--green)" onclick="confirmSell()">Registrar venta</button>
-    </div>
-  </div>
+<div class="sell-box">
+<div class="modal-handle" onclick="closeSell()"></div>
+<h3 id="sellTitle">Registrar venta</h3>
+<p id="sellText">¿Cuántas unidades vendiste?</p>
+<div class="qty-control">
+<button class="qty-btn" onclick="changeQty(-1)">−</button>
+<span class="qty-num" id="sellQty">1</span>
+<button class="qty-btn" onclick="changeQty(1)">+</button>
+</div>
+<div class="sell-actions">
+<button class="btn-cancel" style="flex:1" onclick="closeSell()">Cancelar</button>
+<button class="btn-save" style="flex:1;background:var(--green)" onclick="confirmSell()">Registrar venta</button>
+</div>
+</div>
 </div>
 
 <!-- CONFIRM DELETE -->
 <div class="confirm-overlay" id="confirmOverlay" onclick="handleConfirmOverlayClick(event)">
-  <div class="confirm-box">
-    <div class="modal-handle" onclick="closeConfirm()"></div>
-    <h3>¿Eliminar producto?</h3>
-    <p id="confirmText">Esta acción no se puede deshacer.</p>
-    <div class="confirm-actions"><button class="btn-cancel" style="flex:1" onclick="closeConfirm()">Cancelar</button><button class="btn-save" style="flex:1;background:var(--red)" id="confirmBtn">Eliminar</button></div>
-  </div>
+<div class="confirm-box">
+<div class="modal-handle" onclick="closeConfirm()"></div>
+<h3>¿Eliminar producto?</h3>
+<p id="confirmText">Esta acción no se puede deshacer.</p>
+<div class="confirm-actions"><button class="btn-cancel" style="flex:1" onclick="closeConfirm()">Cancelar</button><button class="btn-save" style="flex:1;background:var(--red)" id="confirmBtn">Eliminar</button></div>
+</div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -343,129 +345,156 @@ let currentColors = [];
 let currentSizes = [];
 let currentSizeType = 'letra';
 const SIZE_PRESETS = {
-  letra: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
-  numero: ['36', '38', '40', '42', '44', '46', '48', '50']
+letra: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+numero: ['36', '38', '40', '42', '44', '46', '48', '50']
 };
 let sellTargetId = null;
 let sellQty = 1;
 
 // ── AUTH ──
 function login() {
-  const val = document.getElementById('passInput').value.trim().toLowerCase();
-  if (val === PASSWORD) {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('app').classList.add('visible');
-    loadProducts();
-  } else {
-    document.getElementById('loginError').style.display = 'block';
-    document.getElementById('passInput').value = '';
-    document.getElementById('passInput').focus();
-  }
+const val = document.getElementById('passInput').value.trim().toLowerCase();
+if (val === PASSWORD) {
+document.getElementById('loginScreen').style.display = 'none';
+document.getElementById('app').classList.add('visible');
+loadProducts();
+} else {
+document.getElementById('loginError').style.display = 'block';
+document.getElementById('passInput').value = '';
+document.getElementById('passInput').focus();
+}
 }
 function logout() {
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('app').classList.remove('visible');
-  document.getElementById('passInput').value = '';
-  document.getElementById('loginError').style.display = 'none';
+document.getElementById('loginScreen').style.display = 'flex';
+document.getElementById('app').classList.remove('visible');
+document.getElementById('passInput').value = '';
+document.getElementById('loginError').style.display = 'none';
 }
 
 // ── SUPABASE CRUD ──
 async function loadProducts() {
-  const { data, error } = await sbClient
-    .from('products')
-    .select('*')
-    .order('created_at', { ascending: true });
-  if (error) { showToast('Error cargando productos'); console.error(error); return; }
-  products = (data || []).map(dbToProduct);
-  renderStats(); renderTable(); renderCards(); updateCatList();
+const { data, error } = await sbClient
+.from('products')
+.select('*')
+.order('created_at', { ascending: true });
+if (error) { showToast('Error cargando productos', true); console.error(error); return; }
+products = (data || []).map(dbToProduct);
+renderStats(); renderTable(); renderCards(); updateCatList();
 }
 
-async function upsertProduct(p) {
-  showSaving();
-  const row = productToDb(p);
-  const { error } = await sbClient.from('products').upsert(row, { onConflict: 'id' });
-  hideSaving();
-  if (error) { showToast('Error guardando en la base de datos'); console.error(error); }
+// Devuelve {ok:true} o {ok:false, error}. Reintenta una vez automáticamente
+// si falla (cubre cortes de conexión momentáneos) antes de reportar error real.
+async function upsertProduct(p, isRetry) {
+showSaving();
+const row = productToDb(p);
+try {
+const { error } = await sbClient.from('products').upsert(row, { onConflict: 'id' });
+hideSaving();
+if (error) {
+console.error('upsert error:', error);
+if (!isRetry) {
+await new Promise(r => setTimeout(r, 900));
+return upsertProduct(p, true);
+}
+return { ok: false, error };
+}
+return { ok: true };
+} catch (err) {
+hideSaving();
+console.error('upsert exception:', err);
+if (!isRetry) {
+await new Promise(r => setTimeout(r, 900));
+return upsertProduct(p, true);
+}
+return { ok: false, error: err };
+}
 }
 
 async function deleteProductDb(id) {
-  showSaving();
-  const { error } = await sbClient.from('products').delete().eq('id', id);
-  hideSaving();
-  if (error) { showToast('Error eliminando producto'); console.error(error); }
+showSaving();
+try {
+const { error } = await sbClient.from('products').delete().eq('id', id);
+hideSaving();
+if (error) { showToast('Error eliminando producto', true); console.error(error); return { ok: false, error }; }
+return { ok: true };
+} catch (err) {
+hideSaving();
+showToast('Error eliminando producto', true); console.error(err);
+return { ok: false, error: err };
+}
 }
 
 // ── MAPEO DB <-> JS ──
 function dbToProduct(row) {
-  // img puede ser string simple o JSON array
-  let imgs = [];
-  if (row.img) {
-    try {
-      const parsed = JSON.parse(row.img);
-      imgs = Array.isArray(parsed) ? parsed : [row.img];
-    } catch { imgs = [row.img]; }
-  }
-  // colors: jsonb array de {name, hex}
-  let colors = [];
-  if (row.colors) {
-    try { colors = typeof row.colors === 'string' ? JSON.parse(row.colors) : (row.colors || []); }
-    catch { colors = []; }
-  }
-  return {
-    id: row.id,
-    name: row.name,
-    category: row.category,
-    price: Number(row.price),
-    originalPrice: row.original_price ? Number(row.original_price) : null,
-    onOffer: !!row.original_price,
-    stock: row.stock || 0,
-    season: row.season || 'all',
-    active: row.active !== false,
-    imgs,
-    img: imgs[0] || null,
-    emoji: imgs.length ? null : '👗',
-    sizes: row.sizes ? row.sizes : ['Único'],
-    sizeType: row.size_type || 'letra',
-    colors,
-    desc: row["desc"] || '',
-    sales: row.sales || 0,
-    createdAt: row.created_at
-  };
+// img puede ser string simple o JSON array
+let imgs = [];
+if (row.img) {
+try {
+const parsed = JSON.parse(row.img);
+imgs = Array.isArray(parsed) ? parsed : [row.img];
+} catch { imgs = [row.img]; }
+}
+// colors: jsonb array de {name, hex}
+let colors = [];
+if (row.colors) {
+try { colors = typeof row.colors === 'string' ? JSON.parse(row.colors) : (row.colors || []); }
+catch { colors = []; }
+}
+return {
+id: row.id,
+name: row.name,
+category: row.category,
+price: Number(row.price),
+originalPrice: row.original_price ? Number(row.original_price) : null,
+onOffer: !!row.original_price,
+stock: row.stock || 0,
+season: row.season || 'all',
+active: row.active !== false,
+imgs,
+img: imgs[0] || null,
+emoji: imgs.length ? null : '👗',
+sizes: row.sizes ? row.sizes : ['Único'],
+sizeType: row.size_type || 'letra',
+colors,
+desc: row["desc"] || '',
+sales: row.sales || 0,
+createdAt: row.created_at
+};
 }
 
 function productToDb(p) {
-  // Guardar imgs como JSON array si hay más de 1, o string simple si hay 1
-  const imgVal = p.imgs && p.imgs.length > 1
-    ? JSON.stringify(p.imgs)
-    : (p.imgs && p.imgs.length === 1 ? p.imgs[0] : null);
-  return {
-    id: p.id,
-    name: p.name,
-    category: p.category,
-    price: p.price,
-    original_price: p.originalPrice || null,
-    stock: p.stock,
-    season: p.season || 'all',
-    active: p.active,
-    img: imgVal,
-    sales: p.sales || 0,
-    sizes: p.sizes || ['Único'],
-    size_type: p.sizeType || 'letra',
-    colors: p.colors && p.colors.length ? p.colors : null,
-    'desc': p.desc || ''
-  };
+// Guardar imgs como JSON array si hay más de 1, o string simple si hay 1
+const imgVal = p.imgs && p.imgs.length > 1
+? JSON.stringify(p.imgs)
+: (p.imgs && p.imgs.length === 1 ? p.imgs[0] : null);
+return {
+id: p.id,
+name: p.name,
+category: p.category,
+price: p.price,
+original_price: p.originalPrice || null,
+stock: p.stock,
+season: p.season || 'all',
+active: p.active,
+img: imgVal,
+sales: p.sales || 0,
+sizes: p.sizes || ['Único'],
+size_type: p.sizeType || 'letra',
+colors: p.colors && p.colors.length ? p.colors : null,
+'desc': p.desc || ''
+};
 }
 
 function nextId() {
-  return 'prod_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+return 'prod_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
 }
 
 // ── SAVING INDICATOR ──
 function showSaving() { document.getElementById('savingIndicator').classList.add('show'); }
 function hideSaving() {
-  const el = document.getElementById('savingIndicator');
-  el.textContent = '✓ Guardado';
-  setTimeout(() => { el.classList.remove('show'); el.textContent = 'Guardando...'; }, 1500);
+const el = document.getElementById('savingIndicator');
+el.textContent = '✓ Guardado';
+setTimeout(() => { el.classList.remove('show'); el.textContent = 'Guardando...'; }, 1500);
 }
 
 // ── RENDER ──
@@ -473,236 +502,251 @@ function formatPrice(p) { return '$' + Number(p).toLocaleString('es-AR'); }
 function stockClass(s) { return s === 0 ? 'stock-zero' : (s <= 3 ? 'stock-low' : 'stock-ok'); }
 
 function renderStats() {
-  const total = products.length;
-  const active = products.filter(p => p.active).length;
-  const lowStock = products.filter(p => p.stock <= 3).length;
-  const offers = products.filter(p => p.onOffer).length;
-  document.getElementById('stats').innerHTML = `
-    <div class="stat-card"><div class="stat-label">Total productos</div><div class="stat-value">${total}</div></div>
-    <div class="stat-card"><div class="stat-label">Activos</div><div class="stat-value coral">${active}</div></div>
-    <div class="stat-card"><div class="stat-label">Stock bajo</div><div class="stat-value">${lowStock}</div></div>
-    <div class="stat-card"><div class="stat-label">En oferta</div><div class="stat-value coral">${offers}</div></div>`;
+const total = products.length;
+const active = products.filter(p => p.active).length;
+const lowStock = products.filter(p => p.stock <= 3).length;
+const offers = products.filter(p => p.onOffer).length;
+document.getElementById('stats').innerHTML = `
+<div class="stat-card"><div class="stat-label">Total productos</div><div class="stat-value">${total}</div></div>
+<div class="stat-card"><div class="stat-label">Activos</div><div class="stat-value coral">${active}</div></div>
+<div class="stat-card"><div class="stat-label">Stock bajo</div><div class="stat-value">${lowStock}</div></div>
+<div class="stat-card"><div class="stat-label">En oferta</div><div class="stat-value coral">${offers}</div></div>`;
 }
 
 function renderTable() {
-  const tbody = document.getElementById('productsTable');
-  const empty = document.getElementById('emptyStateDesktop');
-  if (!products.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
-  empty.style.display = 'none';
-  tbody.innerHTML = products.map(p => `
-    <tr>
-      <td><div class="prod-emoji">${p.img ? `<img src="${p.img}" alt="${p.name}">` : (p.emoji || '👗')}</div></td>
-      <td>
-        <div class="prod-name">${p.name}</div>
-        <div class="prod-sizes">${p.sizes ? p.sizes.join(', ') : ''}${p.colors && p.colors.length ? ' · ' + p.colors.length + ' color' + (p.colors.length > 1 ? 'es' : '') : ''}${p.imgs && p.imgs.length > 1 ? ' · ' + p.imgs.length + ' fotos' : ''}</div>
-      </td>
-      <td><span class="badge" style="background:var(--cream-dark);color:var(--text-muted)">${p.category}</span></td>
-      <td class="price-cell">${p.onOffer && p.originalPrice ? `<span class="original-price">${formatPrice(p.originalPrice)}</span><span class="offer-price">${formatPrice(p.price)}</span>` : formatPrice(p.price)}</td>
-      <td><span class="stock-pill ${stockClass(p.stock)}">${p.stock} u.</span></td>
-      <td><label class="toggle"><input type="checkbox" ${p.active ? 'checked' : ''} onchange="toggleActive('${p.id}')"><span class="toggle-slider"></span></label></td>
-      <td><div class="action-btns">
-        <button class="btn-sell" onclick="openSell('${p.id}')">🛒 Vendí</button>
-        <button class="btn-edit" onclick="openModal('${p.id}')">✏️</button>
-        <button class="btn-delete" onclick="confirmDelete('${p.id}','${p.name.replace(/'/g, "\\'")}')">🗑️</button>
-      </div></td>
-    </tr>`).join('');
+const tbody = document.getElementById('productsTable');
+const empty = document.getElementById('emptyStateDesktop');
+if (!products.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+empty.style.display = 'none';
+tbody.innerHTML = products.map(p => `
+<tr>
+<td><div class="prod-emoji">${p.img ? `<img src="${p.img}" alt="${p.name}">` : (p.emoji || '👗')}</div></td>
+<td>
+<div class="prod-name">${p.name}</div>
+<div class="prod-sizes">${p.sizes ? p.sizes.join(', ') : ''}${p.colors && p.colors.length ? ' · ' + p.colors.length + ' color' + (p.colors.length > 1 ? 'es' : '') : ''}${p.imgs && p.imgs.length > 1 ? ' · ' + p.imgs.length + ' fotos' : ''}</div>
+</td>
+<td><span class="badge" style="background:var(--cream-dark);color:var(--text-muted)">${p.category}</span></td>
+<td class="price-cell">${p.onOffer && p.originalPrice ? `<span class="original-price">${formatPrice(p.originalPrice)}</span><span class="offer-price">${formatPrice(p.price)}</span>` : formatPrice(p.price)}</td>
+<td><span class="stock-pill ${stockClass(p.stock)}">${p.stock} u.</span></td>
+<td><label class="toggle"><input type="checkbox" ${p.active ? 'checked' : ''} onchange="toggleActive('${p.id}')"><span class="toggle-slider"></span></label></td>
+<td><div class="action-btns">
+<button class="btn-sell" onclick="openSell('${p.id}')">🛒 Vendí</button>
+<button class="btn-edit" onclick="openModal('${p.id}')">✏️</button>
+<button class="btn-delete" onclick="confirmDelete('${p.id}','${p.name.replace(/'/g, "\\'")}')">🗑️</button>
+</div></td>
+</tr>`).join('');
 }
 
 function renderCards() {
-  const wrap = document.getElementById('cardsWrap');
-  const empty = document.getElementById('emptyStateMobile');
-  if (!products.length) { wrap.innerHTML = ''; empty.style.display = 'block'; return; }
-  empty.style.display = 'none';
-  wrap.innerHTML = products.map(p => `
-    <div class="product-card">
-      <div class="card-img">${p.img ? `<img src="${p.img}" alt="${p.name}">` : (p.emoji || '👗')}</div>
-      <div class="card-body">
-        <div class="card-name">${p.name}</div>
-        <div class="card-meta">${p.category} · ${p.sizes ? p.sizes.join(', ') : ''}${p.imgs && p.imgs.length > 1 ? ' · 📷' + p.imgs.length : ''}${p.colors && p.colors.length ? ' · 🎨' + p.colors.length : ''} · <span class="stock-pill ${stockClass(p.stock)}">${p.stock} u.</span></div>
-        <div class="card-price">${p.onOffer && p.originalPrice ? `<span class="original-price">${formatPrice(p.originalPrice)}</span><span class="offer-price">${formatPrice(p.price)}</span>` : formatPrice(p.price)}${p.onOffer ? '<span class="badge badge-offer" style="margin-left:0.4rem">🔥 Oferta</span>' : ''}</div>
-        <div class="card-footer">
-          <label class="toggle"><input type="checkbox" ${p.active ? 'checked' : ''} onchange="toggleActive('${p.id}')"><span class="toggle-slider"></span></label>
-          <div class="card-actions">
-            <button class="btn-sell" onclick="openSell('${p.id}')">🛒 Vendí</button>
-            <button class="btn-edit" onclick="openModal('${p.id}')">✏️ Editar</button>
-            <button class="btn-delete" onclick="confirmDelete('${p.id}','${p.name.replace(/'/g, "\\'")}')">🗑️</button>
-          </div>
-        </div>
-      </div>
-    </div>`).join('');
+const wrap = document.getElementById('cardsWrap');
+const empty = document.getElementById('emptyStateMobile');
+if (!products.length) { wrap.innerHTML = ''; empty.style.display = 'block'; return; }
+empty.style.display = 'none';
+wrap.innerHTML = products.map(p => `
+<div class="product-card">
+<div class="card-img">${p.img ? `<img src="${p.img}" alt="${p.name}">` : (p.emoji || '👗')}</div>
+<div class="card-body">
+<div class="card-name">${p.name}</div>
+<div class="card-meta">${p.category} · ${p.sizes ? p.sizes.join(', ') : ''}${p.imgs && p.imgs.length > 1 ? ' · 📷' + p.imgs.length : ''}${p.colors && p.colors.length ? ' · 🎨' + p.colors.length : ''} · <span class="stock-pill ${stockClass(p.stock)}">${p.stock} u.</span></div>
+<div class="card-price">${p.onOffer && p.originalPrice ? `<span class="original-price">${formatPrice(p.originalPrice)}</span><span class="offer-price">${formatPrice(p.price)}</span>` : formatPrice(p.price)}${p.onOffer ? '<span class="badge badge-offer" style="margin-left:0.4rem">🔥 Oferta</span>' : ''}</div>
+<div class="card-footer">
+<label class="toggle"><input type="checkbox" ${p.active ? 'checked' : ''} onchange="toggleActive('${p.id}')"><span class="toggle-slider"></span></label>
+<div class="card-actions">
+<button class="btn-sell" onclick="openSell('${p.id}')">🛒 Vendí</button>
+<button class="btn-edit" onclick="openModal('${p.id}')">✏️ Editar</button>
+<button class="btn-delete" onclick="confirmDelete('${p.id}','${p.name.replace(/'/g, "\\'")}')">🗑️</button>
+</div>
+</div>
+</div>
+</div>`).join('');
 }
 
 function updateCatList() {
-  const cats = [...new Set(products.map(p => p.category))];
-  document.getElementById('catList').innerHTML = cats.map(c => `<option value="${c}">`).join('');
+const cats = [...new Set(products.map(p => p.category))];
+document.getElementById('catList').innerHTML = cats.map(c => `<option value="${c}">`).join('');
 }
 
 // ── TOGGLE ACTIVE ──
 async function toggleActive(id) {
-  const p = products.find(x => x.id === id);
-  if (!p) return;
-  p.active = !p.active;
-  renderStats(); renderTable(); renderCards();
-  await upsertProduct(p);
-  showToast(p.active ? `"${p.name}" activado ✓` : `"${p.name}" desactivado`);
+const p = products.find(x => x.id === id);
+if (!p) return;
+const prevActive = p.active;
+p.active = !p.active;
+renderStats(); renderTable(); renderCards();
+const result = await upsertProduct(p);
+if (!result.ok) {
+// revertimos si no se pudo guardar de verdad
+p.active = prevActive;
+renderStats(); renderTable(); renderCards();
+showToast('⚠️ No se pudo actualizar. Revisá tu conexión.', true);
+return;
+}
+showToast(p.active ? `"${p.name}" activado ✓` : `"${p.name}" desactivado`);
 }
 
 // ── VENTAS ──
 function openSell(id) {
-  const p = products.find(x => x.id === id);
-  if (!p) return;
-  if (p.stock <= 0) { showToast(`"${p.name}" no tiene stock`); return; }
-  sellTargetId = id; sellQty = 1;
-  document.getElementById('sellTitle').textContent = `Vendí: ${p.name}`;
-  document.getElementById('sellText').textContent = `Stock actual: ${p.stock} unidades. ¿Cuántas vendiste?`;
-  document.getElementById('sellQty').textContent = sellQty;
-  document.getElementById('sellOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
+const p = products.find(x => x.id === id);
+if (!p) return;
+if (p.stock <= 0) { showToast(`"${p.name}" no tiene stock`); return; }
+sellTargetId = id; sellQty = 1;
+document.getElementById('sellTitle').textContent = `Vendí: ${p.name}`;
+document.getElementById('sellText').textContent = `Stock actual: ${p.stock} unidades. ¿Cuántas vendiste?`;
+document.getElementById('sellQty').textContent = sellQty;
+document.getElementById('sellOverlay').classList.add('open');
+document.body.style.overflow = 'hidden';
 }
 function changeQty(delta) {
-  const p = products.find(x => x.id === sellTargetId);
-  if (!p) return;
-  sellQty = Math.max(1, Math.min(p.stock, sellQty + delta));
-  document.getElementById('sellQty').textContent = sellQty;
+const p = products.find(x => x.id === sellTargetId);
+if (!p) return;
+sellQty = Math.max(1, Math.min(p.stock, sellQty + delta));
+document.getElementById('sellQty').textContent = sellQty;
 }
 async function confirmSell() {
-  const p = products.find(x => x.id === sellTargetId);
-  if (!p) return;
-  p.stock = Math.max(0, p.stock - sellQty);
-  p.sales = (p.sales || 0) + sellQty;
-  renderStats(); renderTable(); renderCards(); closeSell();
-  showToast(`Venta registrada: ${sellQty} × "${p.name}" ✓`);
-  await upsertProduct(p);
+const p = products.find(x => x.id === sellTargetId);
+if (!p) return;
+const prevStock = p.stock, prevSales = p.sales || 0;
+p.stock = Math.max(0, p.stock - sellQty);
+p.sales = (p.sales || 0) + sellQty;
+renderStats(); renderTable(); renderCards(); closeSell();
+const result = await upsertProduct(p);
+if (!result.ok) {
+p.stock = prevStock; p.sales = prevSales;
+renderStats(); renderTable(); renderCards();
+showToast('⚠️ No se pudo registrar la venta. Revisá tu conexión e intentá de nuevo.', true);
+return;
+}
+showToast(`Venta registrada: ${sellQty} × "${p.name}" ✓`);
 }
 function closeSell() { document.getElementById('sellOverlay').classList.remove('open'); document.body.style.overflow = ''; sellTargetId = null; }
 function handleSellOverlayClick(e) { if (e.target === document.getElementById('sellOverlay')) closeSell(); }
 
 // ── MULTI-FOTO ──
 function handleImagesUpload(event) {
-  const files = Array.from(event.target.files);
-  const remaining = 6 - currentImgs.length;
-  const toProcess = files.slice(0, remaining);
-  let processed = 0;
-  toProcess.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const img = new Image();
-      img.onload = function() {
-        const canvas = document.createElement('canvas');
-        const MAX = 900; let w = img.width, h = img.height;
-        if (w > h) { if (w > MAX) { h = h * MAX / w; w = MAX; } }
-        else { if (h > MAX) { w = w * MAX / h; h = MAX; } }
-        canvas.width = w; canvas.height = h;
-        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        currentImgs.push(canvas.toDataURL('image/jpeg', 0.82));
-        processed++;
-        if (processed === toProcess.length) renderImgGrid();
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-  event.target.value = '';
+const files = Array.from(event.target.files);
+const remaining = 6 - currentImgs.length;
+const toProcess = files.slice(0, remaining);
+let processed = 0;
+toProcess.forEach(file => {
+const reader = new FileReader();
+reader.onload = function(e) {
+const img = new Image();
+img.onload = function() {
+const canvas = document.createElement('canvas');
+const MAX = 900; let w = img.width, h = img.height;
+if (w > h) { if (w > MAX) { h = h * MAX / w; w = MAX; } }
+else { if (h > MAX) { w = w * MAX / h; h = MAX; } }
+canvas.width = w; canvas.height = h;
+canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+currentImgs.push(canvas.toDataURL('image/jpeg', 0.82));
+processed++;
+if (processed === toProcess.length) renderImgGrid();
+};
+img.src = e.target.result;
+};
+reader.readAsDataURL(file);
+});
+event.target.value = '';
 }
 
 function removeImg(idx) {
-  currentImgs.splice(idx, 1);
-  renderImgGrid();
+currentImgs.splice(idx, 1);
+renderImgGrid();
 }
 
 function renderImgGrid() {
-  const grid = document.getElementById('imgGrid');
-  const thumbs = currentImgs.map((src, i) => `
-    <div class="multi-img-thumb ${i === 0 ? 'main-thumb' : ''}">
-      <img src="${src}" alt="foto ${i+1}">
-      <button class="thumb-remove" onclick="removeImg(${i})">✕</button>
-      ${i === 0 ? '<div class="main-label">Principal</div>' : ''}
-    </div>
-  `).join('');
-  const addBtn = currentImgs.length < 6 ? `
-    <div class="multi-img-add">
-      <input type="file" id="fImg" accept="image/*" multiple onchange="handleImagesUpload(event)">
-      <span style="font-size:1.5rem">📷</span>
-      <span>Agregar</span>
-    </div>` : '';
-  grid.innerHTML = thumbs + addBtn;
+const grid = document.getElementById('imgGrid');
+const thumbs = currentImgs.map((src, i) => `
+<div class="multi-img-thumb ${i === 0 ? 'main-thumb' : ''}">
+<img src="${src}" alt="foto ${i+1}">
+<button class="thumb-remove" onclick="removeImg(${i})">✕</button>
+${i === 0 ? '<div class="main-label">Principal</div>' : ''}
+</div>
+`).join('');
+const addBtn = currentImgs.length < 6 ? `
+<div class="multi-img-add">
+<input type="file" id="fImg" accept="image/*" multiple onchange="handleImagesUpload(event)">
+<span style="font-size:1.5rem">📷</span>
+<span>Agregar</span>
+</div>` : '';
+grid.innerHTML = thumbs + addBtn;
 }
 
 // ── COLORES ──
 function addColor() {
-  const hex = document.getElementById('colorPicker').value;
-  const name = document.getElementById('colorName').value.trim();
-  if (!name) { showToast('Escribí el nombre del color'); return; }
-  if (currentColors.find(c => c.name.toLowerCase() === name.toLowerCase())) { showToast('Ese color ya está agregado'); return; }
-  currentColors.push({ name, hex });
-  document.getElementById('colorName').value = '';
-  renderColorsList();
+const hex = document.getElementById('colorPicker').value;
+const name = document.getElementById('colorName').value.trim();
+if (!name) { showToast('Escribí el nombre del color'); return; }
+if (currentColors.find(c => c.name.toLowerCase() === name.toLowerCase())) { showToast('Ese color ya está agregado'); return; }
+currentColors.push({ name, hex });
+document.getElementById('colorName').value = '';
+renderColorsList();
 }
 
 function removeColor(idx) {
-  currentColors.splice(idx, 1);
-  renderColorsList();
+currentColors.splice(idx, 1);
+renderColorsList();
 }
 
 function renderColorsList() {
-  const list = document.getElementById('colorsList');
-  if (!currentColors.length) {
-    list.innerHTML = '<span style="font-size:0.72rem;color:var(--text-muted);letter-spacing:1px">Sin colores — el panel mostrará solo talles</span>';
-    return;
-  }
-  list.innerHTML = currentColors.map((c, i) => `
-    <div class="color-chip">
-      <div class="color-chip-dot" style="background:${c.hex}"></div>
-      ${c.name}
-      <button class="color-chip-remove" onclick="removeColor(${i})">✕</button>
-    </div>
-  `).join('');
+const list = document.getElementById('colorsList');
+if (!currentColors.length) {
+list.innerHTML = '<span style="font-size:0.72rem;color:var(--text-muted);letter-spacing:1px">Sin colores — el panel mostrará solo talles</span>';
+return;
+}
+list.innerHTML = currentColors.map((c, i) => `
+<div class="color-chip">
+<div class="color-chip-dot" style="background:${c.hex}"></div>
+${c.name}
+<button class="color-chip-remove" onclick="removeColor(${i})">✕</button>
+</div>
+`).join('');
 }
 
 // ── TALLES ──
 function renderSizePresets() {
-  currentSizeType = document.getElementById('fSizeType').value;
-  const row = document.getElementById('sizePresetsRow');
-  row.innerHTML = SIZE_PRESETS[currentSizeType].map(s => `
-    <button type="button" class="size-preset-btn ${currentSizes.includes(s) ? 'selected' : ''}" onclick="toggleSize('${s}')">${s}</button>
-  `).join('');
+currentSizeType = document.getElementById('fSizeType').value;
+const row = document.getElementById('sizePresetsRow');
+row.innerHTML = SIZE_PRESETS[currentSizeType].map(s => `
+<button type="button" class="size-preset-btn ${currentSizes.includes(s) ? 'selected' : ''}" onclick="toggleSize('${s}')">${s}</button>
+`).join('');
 }
 
 function toggleSize(s) {
-  const idx = currentSizes.indexOf(s);
-  if (idx > -1) currentSizes.splice(idx, 1); else currentSizes.push(s);
-  renderSizesList();
-  renderSizePresets();
+const idx = currentSizes.indexOf(s);
+if (idx > -1) currentSizes.splice(idx, 1); else currentSizes.push(s);
+renderSizesList();
+renderSizePresets();
 }
 
 function addCustomSize() {
-  const val = document.getElementById('sizeCustom').value.trim();
-  if (!val) { showToast('Escribí un talle'); return; }
-  if (currentSizes.includes(val)) { showToast('Ese talle ya está agregado'); return; }
-  currentSizes.push(val);
-  document.getElementById('sizeCustom').value = '';
-  renderSizesList();
-  renderSizePresets();
+const val = document.getElementById('sizeCustom').value.trim();
+if (!val) { showToast('Escribí un talle'); return; }
+if (currentSizes.includes(val)) { showToast('Ese talle ya está agregado'); return; }
+currentSizes.push(val);
+document.getElementById('sizeCustom').value = '';
+renderSizesList();
+renderSizePresets();
 }
 
 function removeSize(idx) {
-  currentSizes.splice(idx, 1);
-  renderSizesList();
-  renderSizePresets();
+currentSizes.splice(idx, 1);
+renderSizesList();
+renderSizePresets();
 }
 
 function renderSizesList() {
-  const list = document.getElementById('sizesList');
-  if (!currentSizes.length) {
-    list.innerHTML = '<span style="font-size:0.72rem;color:var(--text-muted);letter-spacing:1px">Sin talles — se usará "Único"</span>';
-    return;
-  }
-  list.innerHTML = currentSizes.map((s, i) => `
-    <div class="color-chip">
-      ${s}
-      <button class="color-chip-remove" onclick="removeSize(${i})">✕</button>
-    </div>
-  `).join('');
+const list = document.getElementById('sizesList');
+if (!currentSizes.length) {
+list.innerHTML = '<span style="font-size:0.72rem;color:var(--text-muted);letter-spacing:1px">Sin talles — se usará "Único"</span>';
+return;
+}
+list.innerHTML = currentSizes.map((s, i) => `
+<div class="color-chip">
+${s}
+<button class="color-chip-remove" onclick="removeSize(${i})">✕</button>
+</div>
+`).join('');
 }
 
 // ── MODAL PRODUCTO ──
@@ -710,131 +754,161 @@ function handleOverlayClick(e) { if (e.target === document.getElementById('modal
 function handleConfirmOverlayClick(e) { if (e.target === document.getElementById('confirmOverlay')) closeConfirm(); }
 
 function openModal(id) {
-  currentImgs = [];
-  currentColors = [];
-  currentSizes = [];
-  currentSizeType = 'letra';
-  document.getElementById('modalOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
+currentImgs = [];
+currentColors = [];
+currentSizes = [];
+currentSizeType = 'letra';
+document.getElementById('modalOverlay').classList.add('open');
+document.body.style.overflow = 'hidden';
 
-  if (id) {
-    const p = products.find(x => x.id === id);
-    if (!p) return;
-    document.getElementById('modalTitle').textContent = 'Editar producto';
-    document.getElementById('editId').value = p.id;
-    document.getElementById('fName').value = p.name;
-    document.getElementById('fCategory').value = p.category;
-    document.getElementById('fDesc').value = p.desc || '';
-    document.getElementById('fPrice').value = p.price;
-    document.getElementById('fStock').value = p.stock;
-    document.getElementById('fSeason').value = p.season || 'all';
-    document.getElementById('fSizeType').value = p.sizeType || 'letra';
-    document.getElementById('fActive').checked = p.active;
-    document.getElementById('fOnOffer').checked = p.onOffer || false;
-    document.getElementById('fOriginalPrice').value = p.originalPrice || '';
-    document.getElementById('offerFields').classList.toggle('visible', !!p.onOffer);
-    // Fotos
-    currentImgs = p.imgs ? [...p.imgs] : (p.img ? [p.img] : []);
-    // Colores
-    currentColors = p.colors ? [...p.colors] : [];
-    // Talles
-    currentSizes = p.sizes ? [...p.sizes] : [];
-  } else {
-    document.getElementById('modalTitle').textContent = 'Nuevo producto';
-    document.getElementById('editId').value = '';
-    document.getElementById('fName').value = '';
-    document.getElementById('fCategory').value = '';
-    document.getElementById('fDesc').value = '';
-    document.getElementById('fPrice').value = '';
-    document.getElementById('fStock').value = '';
-    currentSizes = ['XS', 'S', 'M', 'L'];
-    document.getElementById('fSeason').value = 'all';
-    document.getElementById('fSizeType').value = 'letra';
-    document.getElementById('fActive').checked = true;
-    document.getElementById('fOnOffer').checked = false;
-    document.getElementById('fOriginalPrice').value = '';
-    document.getElementById('offerFields').classList.remove('visible');
-  }
-  renderImgGrid();
-  renderColorsList();
-  renderSizePresets();
-  renderSizesList();
+if (id) {
+const p = products.find(x => x.id === id);
+if (!p) return;
+document.getElementById('modalTitle').textContent = 'Editar producto';
+document.getElementById('editId').value = p.id;
+document.getElementById('fName').value = p.name;
+document.getElementById('fCategory').value = p.category;
+document.getElementById('fDesc').value = p.desc || '';
+document.getElementById('fPrice').value = p.price;
+document.getElementById('fStock').value = p.stock;
+document.getElementById('fSeason').value = p.season || 'all';
+document.getElementById('fSizeType').value = p.sizeType || 'letra';
+document.getElementById('fActive').checked = p.active;
+document.getElementById('fOnOffer').checked = p.onOffer || false;
+document.getElementById('fOriginalPrice').value = p.originalPrice || '';
+document.getElementById('offerFields').classList.toggle('visible', !!p.onOffer);
+// Fotos
+currentImgs = p.imgs ? [...p.imgs] : (p.img ? [p.img] : []);
+// Colores
+currentColors = p.colors ? [...p.colors] : [];
+// Talles
+currentSizes = p.sizes ? [...p.sizes] : [];
+} else {
+document.getElementById('modalTitle').textContent = 'Nuevo producto';
+document.getElementById('editId').value = '';
+document.getElementById('fName').value = '';
+document.getElementById('fCategory').value = '';
+document.getElementById('fDesc').value = '';
+document.getElementById('fPrice').value = '';
+document.getElementById('fStock').value = '';
+currentSizes = ['XS', 'S', 'M', 'L'];
+document.getElementById('fSeason').value = 'all';
+document.getElementById('fSizeType').value = 'letra';
+document.getElementById('fActive').checked = true;
+document.getElementById('fOnOffer').checked = false;
+document.getElementById('fOriginalPrice').value = '';
+document.getElementById('offerFields').classList.remove('visible');
+}
+renderImgGrid();
+renderColorsList();
+renderSizePresets();
+renderSizesList();
 }
 
 function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); document.body.style.overflow = ''; }
 function toggleOfferFields() { document.getElementById('offerFields').classList.toggle('visible', document.getElementById('fOnOffer').checked); }
 
 async function saveProduct() {
-  const name = document.getElementById('fName').value.trim();
-  const category = document.getElementById('fCategory').value.trim();
-  const price = parseFloat(document.getElementById('fPrice').value);
-  const stock = parseInt(document.getElementById('fStock').value);
-  if (!name || !category || !price || isNaN(stock)) { showToast('Completá nombre, categoría, precio y stock'); return; }
-  const sizes = currentSizes.length ? [...currentSizes] : ['Único'];
-  const sizeType = document.getElementById('fSizeType').value;
-  const onOffer = document.getElementById('fOnOffer').checked;
-  const originalPrice = onOffer ? parseFloat(document.getElementById('fOriginalPrice').value) || null : null;
-  const season = document.getElementById('fSeason').value;
-  const editId = document.getElementById('editId').value;
+const name = document.getElementById('fName').value.trim();
+const category = document.getElementById('fCategory').value.trim();
+const price = parseFloat(document.getElementById('fPrice').value);
+const stock = parseInt(document.getElementById('fStock').value);
+if (!name || !category || !price || isNaN(stock)) { showToast('Completá nombre, categoría, precio y stock'); return; }
+const sizes = currentSizes.length ? [...currentSizes] : ['Único'];
+const sizeType = document.getElementById('fSizeType').value;
+const onOffer = document.getElementById('fOnOffer').checked;
+const originalPrice = onOffer ? parseFloat(document.getElementById('fOriginalPrice').value) || null : null;
+const season = document.getElementById('fSeason').value;
+const editId = document.getElementById('editId').value;
 
-  if (editId) {
-    const idx = products.findIndex(p => p.id === editId);
-    if (idx > -1) {
-      products[idx] = {
-        ...products[idx], name, category,
-        desc: document.getElementById('fDesc').value.trim(),
-        price, stock, season,
-        imgs: [...currentImgs],
-        img: currentImgs[0] || null,
-        emoji: currentImgs.length ? null : '👗',
-        sizes, sizeType, colors: [...currentColors],
-        active: document.getElementById('fActive').checked,
-        onOffer, originalPrice
-      };
-      await upsertProduct(products[idx]);
-      showToast(`"${name}" actualizado ✓`);
-    }
-  } else {
-    const newProduct = {
-      id: nextId(), name, category,
-      desc: document.getElementById('fDesc').value.trim(),
-      price, stock, season,
-      emoji: currentImgs.length ? null : '👗',
-      imgs: [...currentImgs],
-      img: currentImgs[0] || null,
-      sizes, sizeType, colors: [...currentColors],
-      active: document.getElementById('fActive').checked,
-      onOffer, originalPrice,
-      sales: 0,
-      createdAt: new Date().toISOString()
-    };
-    products.push(newProduct);
-    await upsertProduct(newProduct);
-    showToast(`"${name}" agregado ✓`);
-  }
-  renderStats(); renderTable(); renderCards(); updateCatList(); closeModal();
+const saveBtn = document.querySelector('.btn-save');
+const originalBtnText = saveBtn.textContent;
+saveBtn.disabled = true;
+saveBtn.textContent = 'Guardando...';
+
+let productToSave;
+if (editId) {
+const idx = products.findIndex(p => p.id === editId);
+if (idx === -1) { saveBtn.disabled = false; saveBtn.textContent = originalBtnText; return; }
+productToSave = {
+...products[idx], name, category,
+desc: document.getElementById('fDesc').value.trim(),
+price, stock, season,
+imgs: [...currentImgs],
+img: currentImgs[0] || null,
+emoji: currentImgs.length ? null : '👗',
+sizes, sizeType, colors: [...currentColors],
+active: document.getElementById('fActive').checked,
+onOffer, originalPrice
+};
+} else {
+productToSave = {
+id: nextId(), name, category,
+desc: document.getElementById('fDesc').value.trim(),
+price, stock, season,
+emoji: currentImgs.length ? null : '👗',
+imgs: [...currentImgs],
+img: currentImgs[0] || null,
+sizes, sizeType, colors: [...currentColors],
+active: document.getElementById('fActive').checked,
+onOffer, originalPrice,
+sales: 0,
+createdAt: new Date().toISOString()
+};
+}
+
+// Primero confirmamos que se guardó de verdad en Supabase.
+// Recién si eso sale bien tocamos el array local, el modal y el "✓".
+const result = await upsertProduct(productToSave);
+
+saveBtn.disabled = false;
+saveBtn.textContent = originalBtnText;
+
+if (!result.ok) {
+showToast('⚠️ No se pudo guardar. Revisá la conexión e intentá de nuevo (no se perdió lo que cargaste).', true);
+return;
+}
+
+if (editId) {
+const idx = products.findIndex(p => p.id === editId);
+if (idx > -1) products[idx] = productToSave;
+showToast(`"${name}" actualizado ✓`);
+} else {
+products.push(productToSave);
+showToast(`"${name}" agregado ✓`);
+}
+
+renderStats(); renderTable(); renderCards(); updateCatList(); closeModal();
 }
 
 // ── DELETE ──
 function confirmDelete(id, name) {
-  document.getElementById('confirmText').textContent = `¿Seguro que querés eliminar "${name}"? Esta acción no se puede deshacer.`;
-  document.getElementById('confirmBtn').onclick = () => deleteProduct(id);
-  document.getElementById('confirmOverlay').classList.add('open');
+document.getElementById('confirmText').textContent = `¿Seguro que querés eliminar "${name}"? Esta acción no se puede deshacer.`;
+document.getElementById('confirmBtn').onclick = () => deleteProduct(id);
+document.getElementById('confirmOverlay').classList.add('open');
 }
 function closeConfirm() { document.getElementById('confirmOverlay').classList.remove('open'); }
 async function deleteProduct(id) {
-  const p = products.find(x => x.id === id);
-  products = products.filter(x => x.id !== id);
-  renderStats(); renderTable(); renderCards(); closeConfirm();
-  showToast(`"${p?.name}" eliminado`);
-  await deleteProductDb(id);
+const p = products.find(x => x.id === id);
+const result = await deleteProductDb(id);
+closeConfirm();
+if (!result.ok) {
+showToast('⚠️ No se pudo eliminar. Revisá tu conexión.', true);
+return;
+}
+products = products.filter(x => x.id !== id);
+renderStats(); renderTable(); renderCards();
+showToast(`"${p?.name}" eliminado`);
 }
 
 // ── TOAST ──
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+function showToast(msg, isError) {
+const t = document.getElementById('toast');
+clearTimeout(t._hideTimer);
+t.textContent = msg;
+t.classList.toggle('toast-error', !!isError);
+t.classList.add('show');
+t._hideTimer = setTimeout(() => t.classList.remove('show'), isError ? 4500 : 2500);
 }
 
 document.getElementById('passInput').focus();
